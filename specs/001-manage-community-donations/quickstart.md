@@ -51,6 +51,10 @@ banco.
 
 ## Static and Automated Validation
 
+Os testes de integração usam Testcontainers para iniciar PostgreSQL 18 efêmero. Docker deve estar
+ativo, mas não é necessário configurar `TEST_DATABASE_URL` nem manter o serviço `db` de
+desenvolvimento em execução para essas suítes.
+
 ```bash
 npm run lint
 npm run typecheck

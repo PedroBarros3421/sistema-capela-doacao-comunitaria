@@ -1,42 +1,36 @@
 import { readFile } from "node:fs/promises";
-import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { Client, Pool } from "pg";
 
 export type DisposableDatabase = {
   client: PrismaClient;
-  schema: string;
+  connectionString: string;
+  container: StartedPostgreSqlContainer;
   cleanup: () => Promise<void>;
 };
 
-function databaseUrl(): string {
+function assertSafeTestEnvironment(): void {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Disposable databases cannot run in production");
   }
-  const url = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
-  if (!url) throw new Error("TEST_DATABASE_URL or DATABASE_URL is required for database tests");
-  if (!url.startsWith("postgresql://")) throw new Error("Database tests require PostgreSQL");
-  return url;
-}
-
-function quotedIdentifier(value: string): string {
-  if (!/^test_[a-f0-9]+$/.test(value)) throw new Error("Unsafe test schema name");
-  return `"${value}"`;
 }
 
 export async function createDisposableDatabase(): Promise<DisposableDatabase> {
-  const connectionString = databaseUrl();
-  const schema = `test_${randomUUID().replaceAll("-", "")}`;
-  const identifier = quotedIdentifier(schema);
+  assertSafeTestEnvironment();
+  const container = await new PostgreSqlContainer("postgres:18-alpine")
+    .withDatabase("capela_test")
+    .withUsername("capela_test")
+    .withPassword("capela_test_password")
+    .start();
+  const connectionString = container.getConnectionUri().replace(/^postgres:\/\//, "postgresql://");
   const setupClient = new Client({ connectionString });
 
   await setupClient.connect();
   try {
-    await setupClient.query(`CREATE SCHEMA ${identifier}`);
-    await setupClient.query(`SET search_path TO ${identifier}`);
     const migrationPaths = [
       "prisma/migrations/001_foundation/migration.sql",
       "prisma/migrations/002_public_donations/migration.sql",
@@ -46,27 +40,23 @@ export async function createDisposableDatabase(): Promise<DisposableDatabase> {
       await setupClient.query(migration);
     }
   } catch (error) {
-    await setupClient.query(`DROP SCHEMA IF EXISTS ${identifier} CASCADE`);
+    await container.stop();
     throw error;
   } finally {
     await setupClient.end();
   }
 
-  const pool = new Pool({ connectionString, options: `-c search_path=${schema}` });
-  const client = new PrismaClient({ adapter: new PrismaPg(pool, { schema }) });
+  const pool = new Pool({ connectionString });
+  const client = new PrismaClient({ adapter: new PrismaPg(pool) });
 
   return {
     client,
-    schema,
+    connectionString,
+    container,
     cleanup: async () => {
       await client.$disconnect();
-      const cleanupClient = new Client({ connectionString });
-      await cleanupClient.connect();
-      try {
-        await cleanupClient.query(`DROP SCHEMA ${identifier} CASCADE`);
-      } finally {
-        await cleanupClient.end();
-      }
+      await pool.end();
+      await container.stop();
     },
   };
 }

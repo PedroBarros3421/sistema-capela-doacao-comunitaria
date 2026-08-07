@@ -27,8 +27,9 @@ Argon2id; `pdf-lib`; Tailwind CSS; npm; Caddy 2; Docker Engine com Docker Compos
 montado somente na aplicação; cópia de segurança criptografada fora da VPS
 
 **Testing**: Vitest para unidade e integração; Testing Library para componentes; Playwright para
-contrato HTTP, ponta a ponta e acessibilidade; axe-core para verificações automatizadas; PostgreSQL
-descartável em Docker para testes de integração
+contrato HTTP, ponta a ponta e acessibilidade; axe-core para verificações automatizadas;
+Testcontainers com PostgreSQL 18 efêmero para cada suíte de integração, sem banco compartilhado
+nem `TEST_DATABASE_URL`
 
 **Target Platform**: Navegadores modernos; servidor Linux VPS x86_64 com Docker, mínimo inicial de
 2 vCPU, 4 GB de RAM e 80 GB SSD

@@ -15,5 +15,7 @@ export default defineConfig({
     include: ["tests/{unit,integration,contract}/**/*.{test,spec}.{ts,tsx}"],
     passWithNoTests: true,
     restoreMocks: true,
+    hookTimeout: 120_000,
+    testTimeout: 30_000,
   },
 });

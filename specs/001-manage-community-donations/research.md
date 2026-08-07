@@ -217,3 +217,19 @@ anonimização evitam codificar uma retenção imutável como se fosse determina
 
 - Retenção indefinida: rejeitada por minimização e risco de privacidade.
 - Exclusão imediata de todo histórico: rejeitada por auditoria e prestação de contas.
+
+## 14. Isolamento dos testes de integração
+
+**Decision**: Executar cada suíte de integração contra um contêiner efêmero PostgreSQL 18 iniciado
+por Testcontainers. As migrações aplicam no contêiner antes dos cenários e o contêiner é encerrado
+ao final, sem depender de `DATABASE_URL`, `TEST_DATABASE_URL` ou do banco de desenvolvimento.
+
+**Rationale**: O isolamento reproduz a versão real do banco, evita interferência entre execuções e
+permite que os testes validem as rotas públicas completas, inclusive carregamento de projetos e
+confirmação, sem substituir os endpoints por mocks.
+
+**Alternatives considered**:
+
+- Esquemas temporários em banco compartilhado: rejeitados por dependerem de serviço previamente
+  configurado e permitirem divergência de versão ou estado.
+- Banco em memória: rejeitado porque não reproduz tipos, constraints e transações do PostgreSQL.
