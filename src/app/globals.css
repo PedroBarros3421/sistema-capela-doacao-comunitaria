@@ -1,0 +1,57 @@
+@import "../styles/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-page);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+button,
+input,
+select,
+textarea {
+  min-height: var(--control-min-size);
+  color: inherit;
+  font: inherit;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 0.2rem solid var(--color-focus);
+  outline-offset: 0.2rem;
+}
+
+.site-placeholder {
+  width: min(100% - (2 * var(--space-6)), 48rem);
+  margin-inline: auto;
+  padding-block: var(--space-12);
+}
+
+.site-placeholder h1 {
+  margin-block: 0 var(--space-4);
+  color: var(--color-primary);
+  font-size: var(--font-size-title);
+  line-height: 1.15;
+}
+
+.site-placeholder p {
+  color: var(--color-text-muted);
+}

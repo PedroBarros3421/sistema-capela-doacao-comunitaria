@@ -1,0 +1,52 @@
+:root {
+  color-scheme: light;
+
+  --font-family-sans: Arial, Helvetica, sans-serif;
+  --font-size-body: 1rem;
+  --font-size-body-public: 1.125rem;
+  --font-size-small: 0.875rem;
+  --font-size-title: clamp(2rem, 5vw, 3rem);
+  --line-height-body: 1.6;
+
+  --color-page: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-text: #172033;
+  --color-text-muted: #46536a;
+  --color-border: #aab4c3;
+  --color-primary: #124e78;
+  --color-primary-hover: #0c3a5b;
+  --color-on-primary: #ffffff;
+  --color-focus: #b44900;
+  --color-success: #17653a;
+  --color-warning: #7a3d00;
+  --color-danger: #a51d2d;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius-small: 0.375rem;
+  --radius-medium: 0.75rem;
+  --control-min-size: 2.75rem;
+  --content-max-width: 75rem;
+}
+
+[data-theme="public"] {
+  --font-size-body: var(--font-size-body-public);
+  --color-page: #fffdf5;
+  --color-text: #17210f;
+  --color-text-muted: #344528;
+  --color-border: #738064;
+  --color-primary: #245c20;
+  --color-primary-hover: #174414;
+}
+
+[data-theme="admin"] {
+  --color-page: #eef2f7;
+  --color-primary: #174a72;
+  --color-primary-hover: #103753;
+}
