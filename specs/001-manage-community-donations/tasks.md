@@ -66,19 +66,19 @@ uma única entrada é persistida e nenhuma autenticação é solicitada.
 ### Tests for User Story 1
 
 - [ ] T019 [P] [US1] Validar o contrato de configuração, simulação e confirmação pública em tests/contract/public-donations.contract.test.ts
-- [ ] T020 [P] [US1] Testar transação atômica, idempotência e rollback de doador/lançamento/recorrência em tests/integration/donation-confirmation.test.ts
-- [ ] T021 [P] [US1] Testar CPF/CNPJ, dinheiro decimal, anonimato e geração idempotente de recibo em tests/integration/donation-receipt.test.ts
+- [X] T020 [P] [US1] Testar transação atômica, idempotência e rollback de doador/lançamento/recorrência em tests/integration/donation-confirmation.test.ts
+- [X] T021 [P] [US1] Testar CPF/CNPJ, dinheiro decimal, anonimato e geração idempotente de recibo em tests/integration/donation-receipt.test.ts
 - [ ] T022 [P] [US1] Testar o fluxo acessível de três passos, Pix/cartão simulados e duplo toque em tests/e2e/donation-public.spec.ts
 
 ### Implementation for User Story 1
 
 - [X] T023 [US1] Adicionar Donor, PaymentSimulation, LedgerEntry, RecurringSubscription e DonationReceipt ao modelo em prisma/schema.prisma
 - [X] T024 [US1] Criar constraints de moeda, destino condicional, documento parcial-único e idempotência em prisma/migrations/002_public_donations/migration.sql
-- [ ] T025 [P] [US1] Implementar consulta de projetos ativos e configuração pública em src/server/domains/projects/public-projects.ts e src/server/config/public-config.ts
-- [ ] T026 [P] [US1] Implementar adaptador de Pix/cartão explicitamente simulado em src/server/integrations/payment-simulator.ts
-- [ ] T027 [US1] Implementar criação/associação inicial de doador pela ordem documento, e-mail e telefone em src/server/domains/donors/match-donor.ts
-- [ ] T028 [US1] Implementar confirmação idempotente que grava doador, lançamento e recorrência numa transação em src/server/domains/finance/confirm-donation.ts
-- [ ] T029 [US1] Implementar recibo PDF derivado do lançamento e link pessoal com token apenas em hash em src/server/documents/donation-receipt.ts e src/server/auth/access-links.ts
+- [X] T025 [P] [US1] Implementar consulta de projetos ativos e configuração pública em src/server/domains/projects/public-projects.ts e src/server/config/public-config.ts
+- [X] T026 [P] [US1] Implementar adaptador de Pix/cartão explicitamente simulado em src/server/integrations/payment-simulator.ts
+- [X] T027 [US1] Implementar criação/associação inicial de doador pela ordem documento, e-mail e telefone em src/server/domains/donors/match-donor.ts
+- [X] T028 [US1] Implementar confirmação idempotente que grava doador, lançamento e recorrência numa transação em src/server/domains/finance/confirm-donation.ts
+- [X] T029 [US1] Implementar recibo PDF derivado do lançamento e link pessoal com token apenas em hash em src/server/documents/donation-receipt.ts e src/server/auth/access-links.ts
 - [ ] T030 [US1] Implementar endpoints de configuração, criação, consulta e confirmação em src/app/api/public/configuration/route.ts, src/app/api/public/payment-simulations/route.ts, src/app/api/public/payment-simulations/[simulationId]/route.ts e src/app/api/public/payment-simulations/[simulationId]/confirmation/route.ts
 - [ ] T031 [P] [US1] Criar boas-vindas e seleção de dinheiro/itens em src/app/(public)/doar/page.tsx e src/components/donor/DonationChoice.tsx
 - [ ] T032 [US1] Criar etapas de tipo/valor, método e destino/revisão em src/app/(public)/doar/dinheiro/page.tsx, src/components/donor/AmountStep.tsx, src/components/donor/MethodStep.tsx e src/components/donor/DestinationStep.tsx

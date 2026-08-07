@@ -45,6 +45,12 @@ export class ConflictError extends AppError {
   }
 }
 
+export class GoneError extends AppError {
+  constructor(message = "O recurso não está mais disponível") {
+    super("GONE", message, 410);
+  }
+}
+
 function zodFieldErrors(error: ZodError): FieldErrors {
   const fields: FieldErrors = {};
   for (const issue of error.issues) {
