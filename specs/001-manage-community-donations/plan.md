@@ -20,8 +20,8 @@ adaptadores simulados nesta entrega, conforme o escopo funcional.
 
 **Language/Version**: TypeScript 5.x sobre Node.js 24 LTS
 
-**Primary Dependencies**: Next.js 16 com App Router e React 19; Prisma ORM; Zod; Argon2id;
-`pdf-lib`; Tailwind CSS; npm; Caddy 2; Docker Engine com Docker Compose v2
+**Primary Dependencies**: Next.js 16 com App Router e React 19; shadcn/ui; Prisma ORM; Zod;
+Argon2id; `pdf-lib`; Tailwind CSS; npm; Caddy 2; Docker Engine com Docker Compose v2
 
 **Storage**: PostgreSQL 18 em contêiner com volume persistente; documentos PDF em volume privado
 montado somente na aplicação; cópia de segurança criptografada fora da VPS
@@ -49,6 +49,14 @@ em `America/Fortaleza`; integrações financeiras e de mensagens simuladas
 **Scale/Scope**: Até 100 acessos públicos e 20 administrativos simultâneos; 10 mil doadores, 100
 mil lançamentos, 100 mil lotes/movimentações e 20 GB de documentos sem mudança arquitetural;
 disponibilidade alvo de 99,5% ao mês, RPO de 6 horas e RTO de 4 horas
+
+### UI Component Strategy
+
+shadcn/ui será a fonte padrão de componentes reutilizáveis para `/admin` e `/doar`. Antes de criar
+uma primitiva própria, a implementação deve reutilizar ou adaptar um componente adequado do
+catálogo. Componentes específicos do domínio e composições próprias são permitidos quando não
+houver equivalente, preservando os requisitos funcionais de acessibilidade, responsividade e
+identidade visual definidos na especificação.
 
 ## Constitution Check
 

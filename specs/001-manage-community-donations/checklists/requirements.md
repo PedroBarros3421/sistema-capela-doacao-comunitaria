@@ -34,3 +34,5 @@
 - Items marked incomplete require spec updates before `$speckit-clarify` or `$speckit-plan`.
 - Validation completed on 2026-08-06 after one revision. Responsiveness, metric definitions and
   explicit scope boundaries were added; no unresolved issues remain.
+- Validation rerun on 2026-08-06 after moving the component-library decision to `plan.md`. The
+  specification now contains only user-facing behavior, domain rules and measurable outcomes.
