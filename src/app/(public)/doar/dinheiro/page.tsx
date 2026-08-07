@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AmountStep, type DonationTypeValue } from "@/components/donor/AmountStep";
@@ -34,19 +34,31 @@ export default function MoneyDonationPage() {
   const [destination, setDestination] = useState("MOST_NEEDED");
   const [donor, setDonor] = useState(emptyDonor);
   const [configuration, setConfiguration] = useState<PublicConfiguration>({ projects: [], volunteerHelp: { contact: "" } });
+  const [configurationError, setConfigurationError] = useState<string | null>(null);
+  const [configurationLoading, setConfigurationLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const submittingRef = useRef(false);
 
-  useEffect(() => {
-    void fetch("/api/public/configuration")
-      .then(async (response) => {
-        if (!response.ok) throw new Error();
-        return response.json() as Promise<{ data: PublicConfiguration }>;
-      })
-      .then(({ data }) => setConfiguration(data))
-      .catch(() => setError("Não foi possível carregar os projetos. Você ainda pode escolher onde for mais necessário."));
+  const loadConfiguration = useCallback(async () => {
+    setConfigurationLoading(true);
+    setConfigurationError(null);
+    try {
+      const response = await fetch("/api/public/configuration");
+      if (!response.ok) throw new Error();
+      const { data } = await response.json() as { data: PublicConfiguration };
+      setConfiguration(data);
+    } catch {
+      setConfigurationError("Não foi possível carregar os projetos. Você ainda pode escolher onde for mais necessário.");
+    } finally {
+      setConfigurationLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const task = window.setTimeout(() => void loadConfiguration(), 0);
+    return () => window.clearTimeout(task);
+  }, [loadConfiguration]);
 
   const destinationName = destination === "MOST_NEEDED"
     ? "Onde for mais necessário"
@@ -129,6 +141,16 @@ export default function MoneyDonationPage() {
         {step === 2 ? <MethodStep method={method} onChange={setMethod} /> : null}
         {step === 3 ? (
           <>
+            {configurationLoading ? <p role="status">Carregando projetos…</p> : null}
+            {configurationError ? (
+              <Alert variant="error" title="Projetos indisponíveis">
+                <p>{configurationError}</p>
+                <Button type="button" variant="secondary" onClick={() => void loadConfiguration()}>Tentar carregar novamente</Button>
+              </Alert>
+            ) : null}
+            {!configurationLoading && !configurationError && configuration.projects.length === 0 ? (
+              <Alert title="Nenhum projeto ativo">Escolha “Onde for mais necessário” para continuar.</Alert>
+            ) : null}
             <DestinationStep projects={configuration.projects} destination={destination} donor={donor} monthly={donationType === "MONTHLY"} onDestinationChange={setDestination} onDonorChange={setDonor} />
             <h2>Revise sua escolha</h2>
             <DonationSummary donationType={donationType} amount={amount} method={method} destinationName={destinationName} />

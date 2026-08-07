@@ -412,3 +412,15 @@ US8: T104 + T105 + T106 + T107; depois T110 + T111 + T115
 - Simuladores devem exibir seu estado e nunca aparentar pagamento ou mensagem real.
 - Migrações devem preservar dados e ter rollback documentado antes do deploy.
 - Commits devem agrupar uma tarefa ou conjunto lógico pequeno e manter testes verdes.
+
+---
+
+## Phase 12: Convergence
+
+**Purpose**: Corrigir regressões observadas no fluxo público concluído e tornar sua validação independente do banco compartilhado e de APIs mockadas.
+
+- [X] T130 CRITICAL Criar teste de regressão que exercite configuração pública, projeto ativo, criação e confirmação simulada pelas rotas reais com PostgreSQL isolado per Constitution V, FR-014, FR-016 e US1/AC1 (contradicts)
+- [X] T131 CRITICAL Corrigir o bootstrap de configuração e banco no desenvolvimento para que `/api/public/configuration` e a confirmação retornem envelopes HTTP úteis e funcionem com o ambiente local documentado per FR-014, FR-016 e US1/AC1 (partial)
+- [X] T132 [P] Migrar o helper e os testes de integração para PostgreSQL 18 efêmero com Testcontainers, sem exigir `TEST_DATABASE_URL` ou banco compartilhado, e atualizar plan.md, research.md e quickstart.md per plan: Testing (partial)
+- [X] T133 [P] Implementar carregamento, vazio, erro recuperável e nova tentativa da lista de projetos no fluxo de dinheiro per Constitution V e FR-014 (partial)
+- [X] T134 Executar as regressões sem mocks de API, os testes de integração com Testcontainers, typecheck e lint, registrando que projetos e confirmação simulada funcionam per SC-005 e Constitution V (partial)

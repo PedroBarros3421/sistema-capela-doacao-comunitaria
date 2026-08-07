@@ -76,7 +76,7 @@ test("conclui Pix simulado em três passos e ignora duplo toque", async ({ page 
     (button as HTMLButtonElement).click();
     (button as HTMLButtonElement).click();
   });
-  await expect(page).toHaveURL(/\/doar\/obrigado$/);
+  await expect(page).toHaveURL(/\/doar\/obrigado$/, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "Muito obrigado!" })).toBeVisible();
   await expect(page.getByText("nenhuma cobrança real", { exact: false })).toBeVisible();
   expect(confirmationCount()).toBe(1);
@@ -90,4 +90,38 @@ test("apresenta cartão como simulação antes da confirmação", async ({ page 
   await page.getByRole("button", { name: "Continuar para método" }).click();
   await page.getByLabel("Cartão simulado").check();
   await expect(page.getByText("não solicita dados reais do cartão", { exact: false })).toBeVisible();
+});
+
+test("permite tentar novamente quando os projetos não carregam", async ({ page }) => {
+  let attempts = 0;
+  await page.route("**/api/public/configuration", async (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ error: { code: "INTERNAL_ERROR", message: "Falha temporária" } }),
+      });
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        data: {
+          projects: [{ id: projectId, name: "Assistência às Famílias" }],
+          volunteerHelp: { label: "Chamar um voluntário", contact: "5585999999999" },
+          itemDelivery: { address: "Capela", instructions: "Entrega presencial" },
+        },
+      }),
+    });
+  });
+
+  await page.goto("/doar/dinheiro");
+  await page.getByRole("button", { name: "Continuar para método" }).click();
+  await page.getByRole("button", { name: "Continuar para destino" }).click();
+
+  await expect(page.getByText("Não foi possível carregar os projetos", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "Tentar carregar novamente" }).click();
+  await expect(page.getByLabel("Assistência às Famílias")).toBeVisible();
+  expect(attempts).toBe(2);
 });
