@@ -37,11 +37,14 @@ export async function createDisposableDatabase(): Promise<DisposableDatabase> {
   try {
     await setupClient.query(`CREATE SCHEMA ${identifier}`);
     await setupClient.query(`SET search_path TO ${identifier}`);
-    const migration = await readFile(
-      resolve(process.cwd(), "prisma/migrations/001_foundation/migration.sql"),
-      "utf8",
-    );
-    await setupClient.query(migration);
+    const migrationPaths = [
+      "prisma/migrations/001_foundation/migration.sql",
+      "prisma/migrations/002_public_donations/migration.sql",
+    ];
+    for (const migrationPath of migrationPaths) {
+      const migration = await readFile(resolve(process.cwd(), migrationPath), "utf8");
+      await setupClient.query(migration);
+    }
   } catch (error) {
     await setupClient.query(`DROP SCHEMA IF EXISTS ${identifier} CASCADE`);
     throw error;

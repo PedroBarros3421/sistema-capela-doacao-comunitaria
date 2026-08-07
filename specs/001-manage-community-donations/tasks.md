@@ -72,8 +72,8 @@ uma única entrada é persistida e nenhuma autenticação é solicitada.
 
 ### Implementation for User Story 1
 
-- [ ] T023 [US1] Adicionar Donor, PaymentSimulation, LedgerEntry, RecurringSubscription e DonationReceipt ao modelo em prisma/schema.prisma
-- [ ] T024 [US1] Criar constraints de moeda, destino condicional, documento parcial-único e idempotência em prisma/migrations/002_public_donations/migration.sql
+- [X] T023 [US1] Adicionar Donor, PaymentSimulation, LedgerEntry, RecurringSubscription e DonationReceipt ao modelo em prisma/schema.prisma
+- [X] T024 [US1] Criar constraints de moeda, destino condicional, documento parcial-único e idempotência em prisma/migrations/002_public_donations/migration.sql
 - [ ] T025 [P] [US1] Implementar consulta de projetos ativos e configuração pública em src/server/domains/projects/public-projects.ts e src/server/config/public-config.ts
 - [ ] T026 [P] [US1] Implementar adaptador de Pix/cartão explicitamente simulado em src/server/integrations/payment-simulator.ts
 - [ ] T027 [US1] Implementar criação/associação inicial de doador pela ordem documento, e-mail e telefone em src/server/domains/donors/match-donor.ts
