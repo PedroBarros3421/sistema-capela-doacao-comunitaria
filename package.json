@@ -18,7 +18,12 @@
     "test:integration": "vitest run tests/integration",
     "test:contract": "vitest run tests/contract",
     "test:e2e": "playwright test tests/e2e",
-    "test:a11y": "playwright test tests/accessibility"
+    "test:a11y": "playwright test tests/accessibility",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
