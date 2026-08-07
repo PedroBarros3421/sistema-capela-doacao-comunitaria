@@ -17,7 +17,6 @@ const confirmationSchema = z.object({
   outcome: z.enum(["CONFIRMED", "FAILED"]),
 }).strict();
 
-type ConfirmationInput = z.input<typeof confirmationSchema>;
 type ConfirmationOptions = {
   client?: PrismaClient;
   appUrl: string;
@@ -60,7 +59,7 @@ async function existingResult(
 }
 
 export async function confirmDonation(
-  rawInput: ConfirmationInput,
+  rawInput: unknown,
   options: ConfirmationOptions,
 ) {
   const input = confirmationSchema.parse(rawInput);

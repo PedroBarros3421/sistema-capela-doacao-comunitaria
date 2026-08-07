@@ -40,7 +40,6 @@ export const createSimulationSchema = z
     path: ["donor"],
   });
 
-export type CreateSimulationInput = z.input<typeof createSimulationSchema>;
 export type NormalizedDonorIdentity = z.output<typeof donorIdentitySchema>;
 type SimulationClient = Pick<PrismaClient, "paymentSimulation" | "project">;
 
@@ -88,7 +87,14 @@ export function serializePaymentSimulation(simulation: PaymentSimulation) {
 }
 
 export async function createPaymentSimulation(
-  rawInput: CreateSimulationInput,
+  rawInput: unknown,
+  client: SimulationClient = db,
+) {
+  return (await startPaymentSimulation(rawInput, client)).simulation;
+}
+
+export async function startPaymentSimulation(
+  rawInput: unknown,
   client: SimulationClient = db,
 ) {
   const input = createSimulationSchema.parse(rawInput);
@@ -97,7 +103,7 @@ export async function createPaymentSimulation(
     if (comparableSimulation(existing) !== comparableInput(input)) {
       throw new ConflictError("A chave de idempotência já foi usada com outros dados");
     }
-    return existing;
+    return { simulation: existing, created: false };
   }
 
   if (input.destination.type === "PROJECT") {
@@ -105,7 +111,7 @@ export async function createPaymentSimulation(
     if (!project) throw new NotFoundError("Projeto ativo não encontrado");
   }
 
-  return client.paymentSimulation.create({
+  const simulation = await client.paymentSimulation.create({
     data: {
       idempotencyKey: input.idempotencyKey,
       donationType: input.donationType,
@@ -118,6 +124,7 @@ export async function createPaymentSimulation(
       expiresAt: new Date(Date.now() + 30 * 60 * 1000),
     },
   });
+  return { simulation, created: true };
 }
 
 export async function getPaymentSimulation(id: string, client: SimulationClient = db) {

@@ -65,7 +65,7 @@ uma única entrada é persistida e nenhuma autenticação é solicitada.
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] Validar o contrato de configuração, simulação e confirmação pública em tests/contract/public-donations.contract.test.ts
+- [X] T019 [P] [US1] Validar o contrato de configuração, simulação e confirmação pública em tests/contract/public-donations.contract.test.ts
 - [X] T020 [P] [US1] Testar transação atômica, idempotência e rollback de doador/lançamento/recorrência em tests/integration/donation-confirmation.test.ts
 - [X] T021 [P] [US1] Testar CPF/CNPJ, dinheiro decimal, anonimato e geração idempotente de recibo em tests/integration/donation-receipt.test.ts
 - [ ] T022 [P] [US1] Testar o fluxo acessível de três passos, Pix/cartão simulados e duplo toque em tests/e2e/donation-public.spec.ts
@@ -79,7 +79,7 @@ uma única entrada é persistida e nenhuma autenticação é solicitada.
 - [X] T027 [US1] Implementar criação/associação inicial de doador pela ordem documento, e-mail e telefone em src/server/domains/donors/match-donor.ts
 - [X] T028 [US1] Implementar confirmação idempotente que grava doador, lançamento e recorrência numa transação em src/server/domains/finance/confirm-donation.ts
 - [X] T029 [US1] Implementar recibo PDF derivado do lançamento e link pessoal com token apenas em hash em src/server/documents/donation-receipt.ts e src/server/auth/access-links.ts
-- [ ] T030 [US1] Implementar endpoints de configuração, criação, consulta e confirmação em src/app/api/public/configuration/route.ts, src/app/api/public/payment-simulations/route.ts, src/app/api/public/payment-simulations/[simulationId]/route.ts e src/app/api/public/payment-simulations/[simulationId]/confirmation/route.ts
+- [X] T030 [US1] Implementar endpoints de configuração, criação, consulta e confirmação em src/app/api/public/configuration/route.ts, src/app/api/public/payment-simulations/route.ts, src/app/api/public/payment-simulations/[simulationId]/route.ts e src/app/api/public/payment-simulations/[simulationId]/confirmation/route.ts
 - [ ] T031 [P] [US1] Criar boas-vindas e seleção de dinheiro/itens em src/app/(public)/doar/page.tsx e src/components/donor/DonationChoice.tsx
 - [ ] T032 [US1] Criar etapas de tipo/valor, método e destino/revisão em src/app/(public)/doar/dinheiro/page.tsx, src/components/donor/AmountStep.tsx, src/components/donor/MethodStep.tsx e src/components/donor/DestinationStep.tsx
 - [ ] T033 [US1] Criar confirmação, agradecimento, instruções passo a passo e ajuda persistente em src/app/(public)/doar/obrigado/page.tsx, src/components/donor/DonationSummary.tsx e src/components/donor/VolunteerHelp.tsx
