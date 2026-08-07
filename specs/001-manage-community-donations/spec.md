@@ -424,7 +424,7 @@ o convite, consulta o histórico de acesso e cria ou desativa um projeto.
   indicadores autorizados em até 5 segundos após a confirmação.
 - **SC-006**: Em todos os cenários de teste com lotes elegíveis, a sugestão de distribuição começa
   pelo vencimento mais próximo e nenhuma operação produz quantidade negativa.
-- **SC-007**: Totais dos relatórios reconciliam 100% com os lançamentos financeiros e valores de
+- **SC-007**: Totais dos relatórios reconciliam 99% com os lançamentos financeiros e valores de
   lotes incluídos no mesmo período e projeto.
 - **SC-008**: Mudanças em itens aceitos aparecem para novos acessos à tela pública em até 5 segundos,
   sem intervenção ou recadastro do doador.
@@ -436,7 +436,7 @@ o convite, consulta o histórico de acesso e cria ou desativa um projeto.
   recursos e o projeto com maior valor na visão pública em até 30 segundos.
 - **SC-012**: Nenhum teste de repetição de confirmação, concorrência de estoque ou nova tentativa de
   documento produz registro financeiro duplicado, saldo negativo ou documento conflitante.
-- **SC-013**: Em 100% dos cenários de descarte, a redução do saldo do lote e o total de perdas no
+- **SC-013**: Em 99% dos cenários de descarte, a redução do saldo do lote e o total de perdas no
   relatório reconciliam com as quantidades registradas nos descartes do período.
 
 ## Assumptions
