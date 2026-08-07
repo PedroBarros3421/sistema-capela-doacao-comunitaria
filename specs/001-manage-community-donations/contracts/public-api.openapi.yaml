@@ -1,0 +1,516 @@
+openapi: 3.1.0
+info:
+  title: Capela Community Donations - Public API
+  version: 1.0.0
+  description: >-
+    Public HTTP contract exposed by the monolithic application under /api/public. Donation
+    endpoints never require an account. Donor history endpoints require a 30-day donor link token.
+servers:
+  - url: /api/public
+tags:
+  - name: Access
+  - name: Configuration
+  - name: Donations
+  - name: Donor Account
+  - name: Transparency
+paths:
+  /access/invitation:
+    put:
+      tags: [Access]
+      summary: Set or replace the password through a valid invitation link
+      security:
+        - accessLink: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              additionalProperties: false
+              properties:
+                newPassword: { $ref: '#/components/schemas/Password' }
+      responses:
+        '204': { description: Password set; link remains valid until expiry or revocation }
+        '401': { $ref: '#/components/responses/InvalidLink' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /access/password-reset-requests:
+    post:
+      tags: [Access]
+      summary: Request a password-reset link without revealing account existence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              additionalProperties: false
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '202':
+          description: Same generic response for existing and unknown e-mail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  deliveryStatus: { const: SIMULATED }
+  /access/password-reset:
+    put:
+      tags: [Access]
+      summary: Set a new password through a valid reset link
+      security:
+        - accessLink: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              additionalProperties: false
+              properties:
+                newPassword: { $ref: '#/components/schemas/Password' }
+      responses:
+        '204':
+          description: Password changed; link remains valid until expiry or revocation
+        '401': { $ref: '#/components/responses/InvalidLink' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /configuration:
+    get:
+      tags: [Configuration]
+      summary: Get public help, delivery guidance, and active projects
+      responses:
+        '200':
+          description: Public configuration without personal data
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicConfiguration' }
+  /accepted-items:
+    get:
+      tags: [Configuration]
+      summary: List items currently accepted for in-person delivery
+      responses:
+        '200':
+          description: Accepted items, priority first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AcceptedItem' }
+  /payment-simulations:
+    post:
+      tags: [Donations]
+      summary: Start a simulated one-off or monthly donation
+      description: >-
+        This endpoint does not charge money. The same Idempotency-Key always returns the same
+        simulation and cannot create duplicate donations.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSimulationInput' }
+      responses:
+        '201':
+          description: Simulation created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentSimulation' }
+        '200':
+          description: Existing simulation returned for repeated key
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentSimulation' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /payment-simulations/{simulationId}:
+    get:
+      tags: [Donations]
+      summary: Read the current simulated payment state
+      parameters:
+        - $ref: '#/components/parameters/SimulationId'
+      responses:
+        '200':
+          description: Simulation state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentSimulation' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /payment-simulations/{simulationId}/confirmation:
+    post:
+      tags: [Donations]
+      summary: Confirm the simulated payment and atomically create donation records
+      parameters:
+        - $ref: '#/components/parameters/SimulationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [outcome]
+              additionalProperties: false
+              properties:
+                outcome:
+                  description: Explicit simulated result selected by the prototype flow.
+                  enum: [CONFIRMED, FAILED]
+      responses:
+        '200':
+          description: Idempotent confirmation result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DonationConfirmation' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '410':
+          description: Simulation expired
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /account/access-requests:
+    post:
+      tags: [Donor Account]
+      summary: Request a donor-account link using an identifier and contact proof
+      description: >-
+        Always returns the same response. It never reveals whether the document, Pix reference, or
+        contact exists. Delivery is recorded as simulated in this release.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifierType, identifier, contact]
+              additionalProperties: false
+              properties:
+                identifierType: { enum: [CPF_CNPJ, PIX_REFERENCE] }
+                identifier: { type: string, minLength: 1, maxLength: 100 }
+                contact: { type: string, minLength: 3, maxLength: 254 }
+      responses:
+        '202':
+          description: Generic accepted response, whether or not a match exists
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, deliveryStatus]
+                properties:
+                  message: { type: string }
+                  deliveryStatus: { const: SIMULATED }
+  /account:
+    get:
+      tags: [Donor Account]
+      summary: Get the donor's own history and recurring subscriptions
+      security:
+        - donorLink: []
+      responses:
+        '200':
+          description: Own donor account projection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DonorAccount' }
+        '401': { $ref: '#/components/responses/InvalidLink' }
+  /account/subscriptions/{subscriptionId}:
+    patch:
+      tags: [Donor Account]
+      summary: Change amount, pause, resume, or cancel an owned subscription
+      security:
+        - donorLink: []
+      parameters:
+        - in: path
+          name: subscriptionId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [action, amount]
+                  additionalProperties: false
+                  properties:
+                    action: { const: CHANGE_AMOUNT }
+                    amount: { $ref: '#/components/schemas/Money' }
+                - type: object
+                  required: [action]
+                  additionalProperties: false
+                  properties:
+                    action: { enum: [PAUSE, RESUME, CANCEL] }
+      responses:
+        '200':
+          description: Subscription updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Subscription' }
+        '401': { $ref: '#/components/responses/InvalidLink' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /account/receipts/{receiptId}.pdf:
+    get:
+      tags: [Donor Account]
+      summary: Download an owned donation receipt
+      security:
+        - donorLink: []
+      parameters:
+        - in: path
+          name: receiptId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: PDF receipt
+          content:
+            application/pdf:
+              schema: { type: string, contentEncoding: binary }
+        '401': { $ref: '#/components/responses/InvalidLink' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /reports/latest:
+    get:
+      tags: [Transparency]
+      summary: Get the latest explicitly published accountability snapshot
+      responses:
+        '200':
+          description: Latest immutable public snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicReport' }
+        '404':
+          description: No report has been published yet
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /reports/latest.pdf:
+    get:
+      tags: [Transparency]
+      summary: Download the latest published report when a PDF exists
+      responses:
+        '200':
+          description: Public PDF without personal data
+          content:
+            application/pdf:
+              schema: { type: string, contentEncoding: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  securitySchemes:
+    accessLink:
+      type: http
+      scheme: bearer
+      bearerFormat: Opaque 256-bit invitation or reset token
+    donorLink:
+      type: http
+      scheme: bearer
+      bearerFormat: Opaque 256-bit access-link token
+  parameters:
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: { type: string, format: uuid }
+    SimulationId:
+      in: path
+      name: simulationId
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    ValidationError:
+      description: Request failed validation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Idempotency, state, or concurrency conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource does not exist or is not visible
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    InvalidLink:
+      description: Donor link is absent, expired, altered, or revoked
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        fieldErrors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+    Money:
+      type: string
+      pattern: '^\d{1,12}\.\d{2}$'
+      examples: ['50.00']
+    Password:
+      type: string
+      minLength: 8
+      pattern: '^(?=.*[A-Za-z])(?=.*\d).+$'
+    Destination:
+      type: object
+      required: [type]
+      properties:
+        type: { enum: [PROJECT, MOST_NEEDED] }
+        projectId: { type: string, format: uuid }
+    PublicConfiguration:
+      type: object
+      required: [projects, volunteerHelp, itemDelivery]
+      properties:
+        projects:
+          type: array
+          items:
+            type: object
+            required: [id, name]
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+        volunteerHelp:
+          type: object
+          required: [label, contact]
+          properties:
+            label: { const: Chamar um voluntário }
+            contact: { type: string }
+        itemDelivery:
+          type: object
+          properties:
+            address: { type: string }
+            instructions: { type: string }
+    AcceptedItem:
+      type: object
+      required: [id, name, category, unit, priority]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        category: { type: string }
+        unit: { enum: [KG, UNIT, LITER] }
+        priority: { type: boolean }
+    DonorIdentity:
+      type: object
+      additionalProperties: false
+      properties:
+        name: { type: string, maxLength: 160 }
+        email: { type: string, format: email }
+        phone: { type: string, maxLength: 20 }
+        cpfCnpj: { type: string, pattern: '^\d{11}|\d{14}$' }
+    CreateSimulationInput:
+      type: object
+      required: [donationType, amount, method, destination]
+      additionalProperties: false
+      properties:
+        donationType: { enum: [ONE_OFF, MONTHLY] }
+        amount: { $ref: '#/components/schemas/Money' }
+        method: { enum: [PIX, CARD] }
+        destination: { $ref: '#/components/schemas/Destination' }
+        donor: { $ref: '#/components/schemas/DonorIdentity' }
+      allOf:
+        - if:
+            properties:
+              donationType: { const: MONTHLY }
+          then:
+            required: [donor]
+    PaymentSimulation:
+      type: object
+      required: [id, donationType, amount, currency, method, status, destination, expiresAt, simulationNotice]
+      properties:
+        id: { type: string, format: uuid }
+        donationType: { enum: [ONE_OFF, MONTHLY] }
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { const: BRL }
+        method: { enum: [PIX, CARD] }
+        status: { enum: [CREATED, PENDING, CONFIRMED, FAILED, EXPIRED] }
+        destination: { $ref: '#/components/schemas/Destination' }
+        expiresAt: { type: string, format: date-time }
+        qrCodePayload:
+          type: [string, 'null']
+          description: Clearly non-payable simulated Pix payload.
+        simulationNotice: { type: string }
+    DonationConfirmation:
+      type: object
+      required: [simulation, thankYouMessage]
+      properties:
+        simulation: { $ref: '#/components/schemas/PaymentSimulation' }
+        ledgerEntryId: { type: [string, 'null'], format: uuid }
+        subscriptionId: { type: [string, 'null'], format: uuid }
+        receiptId: { type: [string, 'null'], format: uuid }
+        accountAccessUrl:
+          type: [string, 'null']
+          format: uri
+          description: >-
+            Returned once for an identified donor. The secret is never persisted in recoverable
+            form. The URL remains reusable for 30 days unless revoked.
+        donorReviewPending: { type: boolean, default: false }
+        thankYouMessage: { type: string }
+    Subscription:
+      type: object
+      required: [id, amount, status, method, destination]
+      properties:
+        id: { type: string, format: uuid }
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { const: BRL }
+        status: { enum: [ACTIVE, PAUSED, CANCELLED] }
+        method: { enum: [PIX, CARD] }
+        nextChargeDate: { type: [string, 'null'], format: date }
+        destination: { $ref: '#/components/schemas/Destination' }
+    DonorAccount:
+      type: object
+      required: [donor, donations, subscriptions]
+      properties:
+        donor:
+          type: object
+          properties:
+            name: { type: string }
+            email: { type: [string, 'null'] }
+            phone: { type: [string, 'null'] }
+            documentMasked: { type: [string, 'null'] }
+        donations:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              occurredOn: { type: string, format: date }
+              amount: { $ref: '#/components/schemas/Money' }
+              projectName: { type: string }
+              receiptId: { type: [string, 'null'], format: uuid }
+        subscriptions:
+          type: array
+          items: { $ref: '#/components/schemas/Subscription' }
+    PublicReport:
+      type: object
+      required: [id, publishedAt, period, totals, byProject]
+      properties:
+        id: { type: string, format: uuid }
+        publishedAt: { type: string, format: date-time }
+        period:
+          type: object
+          properties:
+            from: { type: string, format: date }
+            to: { type: string, format: date }
+        totals:
+          type: object
+          properties:
+            moneyReceived: { $ref: '#/components/schemas/Money' }
+            inKindEstimated: { $ref: '#/components/schemas/Money' }
+            spent: { $ref: '#/components/schemas/Money' }
+        byProject:
+          type: array
+          items:
+            type: object
+            properties:
+              projectName: { type: string }
+              moneyReceived: { $ref: '#/components/schemas/Money' }
+              inKindEstimated: { $ref: '#/components/schemas/Money' }
+              spent: { $ref: '#/components/schemas/Money' }
+        pdfAvailable: { type: boolean }

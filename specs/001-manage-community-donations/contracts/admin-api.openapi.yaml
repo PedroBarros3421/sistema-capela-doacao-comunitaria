@@ -1,0 +1,975 @@
+openapi: 3.1.0
+info:
+  title: Capela Community Donations - Admin API
+  version: 1.0.0
+  description: >-
+    Administrative HTTP contract exposed by the monolithic application under /api/admin.
+    Every operation except login requires an active server-side session and role authorization.
+servers:
+  - url: /api/admin
+security:
+  - cookieAuth: []
+tags:
+  - name: Auth
+  - name: Users
+  - name: Dashboard
+  - name: Finance
+  - name: Donors
+  - name: Projects
+  - name: Inventory
+  - name: Reports
+  - name: Documents
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Authenticate an internal user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '204':
+          description: Session cookie created
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+        '401':
+          $ref: '#/components/responses/InvalidCredentials'
+        '403':
+          description: Account is pending, inactive, or blocked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the current session
+      responses:
+        '204': { description: Session revoked }
+  /me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile and permissions
+      responses:
+        '200':
+          description: Current profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+    patch:
+      tags: [Auth]
+      summary: Update current user's basic profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 160 }
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+  /me/password:
+    put:
+      tags: [Auth]
+      summary: Change current user's password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              additionalProperties: false
+              properties:
+                currentPassword: { type: string }
+                newPassword: { $ref: '#/components/schemas/Password' }
+      responses:
+        '204': { description: Password changed and other sessions revoked }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /users:
+    get:
+      tags: [Users]
+      summary: List users
+      description: General administrator only.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/UserStatus' }
+        - in: query
+          name: role
+          schema: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageResult'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/User' }
+    post:
+      tags: [Users]
+      summary: Create a pending user and invitation link
+      description: General administrator only. The raw invitation URL is returned only now.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, role]
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 160 }
+                email: { type: string, format: email }
+                role: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '201':
+          description: User and 30-day invitation created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user, invitationUrl, deliveryStatus]
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+                  invitationUrl: { type: string, format: uri }
+                  deliveryStatus: { const: SIMULATED }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /users/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    patch:
+      tags: [Users]
+      summary: Edit role, name, e-mail, or activation state
+      description: General administrator only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 160 }
+                email: { type: string, format: email }
+                role: { $ref: '#/components/schemas/UserRole' }
+                status:
+                  enum: [ACTIVE, INACTIVE]
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /users/{userId}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    post:
+      tags: [Users]
+      summary: Unlock a blocked user and reset failed count
+      description: General administrator only.
+      responses:
+        '200':
+          description: User unlocked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /users/{userId}/invitation:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    post:
+      tags: [Users]
+      summary: Revoke prior invitations and issue a new 30-day link
+      description: General administrator only. The raw URL is returned only in this response.
+      responses:
+        '200':
+          description: New invitation generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [invitationUrl, expiresAt, deliveryStatus]
+                properties:
+                  invitationUrl: { type: string, format: uri }
+                  expiresAt: { type: string, format: date-time }
+                  deliveryStatus: { const: SIMULATED }
+  /login-attempts:
+    get:
+      tags: [Users]
+      summary: Search login history
+      description: General administrator only.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - in: query
+          name: userId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: from
+          schema: { type: string, format: date-time }
+        - in: query
+          name: to
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Paginated attempts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageResult'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/LoginAttempt' }
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Get monthly KPIs and chart series authorized for the current role
+      parameters:
+        - in: query
+          name: month
+          schema: { type: string, pattern: '^\d{4}-\d{2}$' }
+      responses:
+        '200':
+          description: Dashboard projection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+  /ledger:
+    get:
+      tags: [Finance]
+      summary: Filter ledger entries
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+        - in: query
+          name: projectId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: type
+          schema: { enum: [INCOME, EXPENSE] }
+        - in: query
+          name: status
+          schema: { enum: [PENDING, CONFIRMED] }
+      responses:
+        '200':
+          description: Paginated ledger
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageResult'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/LedgerEntry' }
+    post:
+      tags: [Finance]
+      summary: Create a manual income or expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ManualLedgerInput' }
+      responses:
+        '201':
+          description: Entry created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LedgerEntry' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /ledger/{entryId}/receipt:
+    post:
+      tags: [Documents]
+      summary: Generate or retrieve a receipt for a confirmed identified income
+      parameters:
+        - in: path
+          name: entryId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '201':
+          description: Receipt metadata
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /donors:
+    get:
+      tags: [Donors]
+      summary: Search donors
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - in: query
+          name: query
+          schema: { type: string, maxLength: 160 }
+        - in: query
+          name: relationshipType
+          schema: { enum: [ONE_OFF, RECURRING, IN_KIND] }
+        - in: query
+          name: reviewStatus
+          schema: { enum: [CLEAR, PENDING_REVIEW] }
+      responses:
+        '200':
+          description: Paginated donors
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageResult'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/DonorSummary' }
+  /donors/{donorId}:
+    get:
+      tags: [Donors]
+      summary: Get donor profile, timeline, and subscriptions
+      parameters:
+        - $ref: '#/components/parameters/DonorId'
+      responses:
+        '200':
+          description: Donor detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DonorDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /donor-match-reviews:
+    get:
+      tags: [Donors]
+      summary: List unresolved or resolved donor identity conflicts
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - in: query
+          name: status
+          schema: { enum: [OPEN, KEEP_SEPARATE, MERGED] }
+      responses:
+        '200':
+          description: Review cases
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResult' }
+  /donor-match-reviews/{reviewId}/resolution:
+    post:
+      tags: [Donors]
+      summary: Keep donors separate or merge a provisional donor
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision, note]
+              additionalProperties: false
+              properties:
+                decision: { enum: [KEEP_SEPARATE, MERGE] }
+                survivingDonorId: { type: string, format: uuid }
+                note: { type: string, minLength: 1, maxLength: 1000 }
+      responses:
+        '200': { description: Review resolved }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      parameters:
+        - in: query
+          name: status
+          schema: { enum: [ACTIVE, INACTIVE] }
+      responses:
+        '200':
+          description: Projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Project' }
+    post:
+      tags: [Projects]
+      summary: Create a project
+      description: General administrator only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 120 }
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Project' }
+  /projects/{projectId}:
+    patch:
+      tags: [Projects]
+      summary: Rename, activate, or deactivate a project
+      description: General administrator only.
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 120 }
+                status: { enum: [ACTIVE, INACTIVE] }
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Project' }
+  /inventory/items:
+    get:
+      tags: [Inventory]
+      summary: List inventory catalog and acceptance state
+      responses:
+        '200':
+          description: Inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InventoryItem' }
+    post:
+      tags: [Inventory]
+      summary: Create an inventory item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InventoryItemInput' }
+      responses:
+        '201':
+          description: Item created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InventoryItem' }
+  /inventory/items/{itemId}:
+    patch:
+      tags: [Inventory]
+      summary: Update catalog and public acceptance configuration
+      parameters:
+        - $ref: '#/components/parameters/ItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 120 }
+                category: { type: string, minLength: 1, maxLength: 80 }
+                unit: { enum: [KG, UNIT, LITER] }
+                averageUnitValue: { $ref: '#/components/schemas/Money' }
+                status: { enum: [ACTIVE, INACTIVE] }
+                accepted: { type: boolean }
+                priority: { type: boolean }
+      responses:
+        '200':
+          description: Item updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InventoryItem' }
+  /inventory/lots:
+    get:
+      tags: [Inventory]
+      summary: Get consolidated inventory with optional lot drill-down
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - in: query
+          name: itemId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: expiryWindowDays
+          schema: { enum: [7, 30] }
+        - in: query
+          name: includeLots
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Consolidated inventory
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResult' }
+    post:
+      tags: [Inventory]
+      summary: Register a new independent lot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InventoryLotInput' }
+      responses:
+        '201':
+          description: Lot registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InventoryLot' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /inventory/movements:
+    post:
+      tags: [Inventory]
+      summary: Confirm a FIFO-by-expiry distribution or a discard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InventoryMovementInput' }
+      responses:
+        '201':
+          description: Movement and lot allocations committed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InventoryMovement' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /inventory/distribution-suggestion:
+    post:
+      tags: [Inventory]
+      summary: Suggest lots in expiry order without changing stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemId, quantity]
+              properties:
+                itemId: { type: string, format: uuid }
+                quantity: { $ref: '#/components/schemas/Quantity' }
+      responses:
+        '200':
+          description: Suggested lot allocations
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MovementLine' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /inventory/lots/{lotId}/term:
+    post:
+      tags: [Documents]
+      summary: Generate or retrieve an in-kind donation term
+      parameters:
+        - $ref: '#/components/parameters/LotId'
+      responses:
+        '201':
+          description: Term metadata
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+  /reports/preview:
+    get:
+      tags: [Reports]
+      summary: Preview financial and in-kind accountability data
+      parameters:
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - in: query
+          name: category
+          schema: { type: string, maxLength: 80 }
+      responses:
+        '200':
+          description: Current derived report
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportSnapshot' }
+  /reports/publications:
+    get:
+      tags: [Reports]
+      summary: List immutable public report publications
+      responses:
+        '200':
+          description: Publications, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ReportPublication' }
+    post:
+      tags: [Reports]
+      summary: Publish an immutable report snapshot
+      description: General administrator only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [from, to]
+              properties:
+                from: { type: string, format: date }
+                to: { type: string, format: date }
+                category: { type: string, maxLength: 80 }
+                generatePdf: { type: boolean, default: true }
+      responses:
+        '201':
+          description: Immutable publication created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportPublication' }
+  /documents/receipts/{receiptId}.pdf:
+    get:
+      tags: [Documents]
+      summary: Download an authorized financial receipt
+      parameters:
+        - in: path
+          name: receiptId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: PDF document
+          content:
+            application/pdf:
+              schema: { type: string, contentEncoding: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /documents/terms/{termId}.pdf:
+    get:
+      tags: [Documents]
+      summary: Download an authorized in-kind donation term
+      parameters:
+        - in: path
+          name: termId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: PDF document
+          content:
+            application/pdf:
+              schema: { type: string, contentEncoding: binary }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: capela_session
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema: { type: integer, minimum: 1, default: 1 }
+    UserId:
+      in: path
+      name: userId
+      required: true
+      schema: { type: string, format: uuid }
+    DonorId:
+      in: path
+      name: donorId
+      required: true
+      schema: { type: string, format: uuid }
+    ProjectId:
+      in: path
+      name: projectId
+      required: true
+      schema: { type: string, format: uuid }
+    ItemId:
+      in: path
+      name: itemId
+      required: true
+      schema: { type: string, format: uuid }
+    LotId:
+      in: path
+      name: lotId
+      required: true
+      schema: { type: string, format: uuid }
+    FromDate:
+      in: query
+      name: from
+      required: true
+      schema: { type: string, format: date }
+    ToDate:
+      in: query
+      name: to
+      required: true
+      schema: { type: string, format: date }
+  responses:
+    InvalidCredentials:
+      description: Invalid e-mail or password
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Request failed validation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: State, identity, idempotency, or concurrency conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found or not visible to current role
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        fieldErrors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      additionalProperties: false
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    Password:
+      type: string
+      minLength: 8
+      pattern: '^(?=.*[A-Za-z])(?=.*\d).+$'
+    UserRole:
+      enum: [GENERAL_ADMIN, FINANCE, INVENTORY_VOLUNTEER]
+    UserStatus:
+      enum: [PENDING, ACTIVE, INACTIVE, BLOCKED]
+    User:
+      type: object
+      required: [id, name, email, role, status, failedLoginCount, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/UserRole' }
+        status: { $ref: '#/components/schemas/UserStatus' }
+        failedLoginCount: { type: integer, minimum: 0, maximum: 5 }
+        lastLoginAt: { type: [string, 'null'], format: date-time }
+        createdAt: { type: string, format: date-time }
+    LoginAttempt:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        attemptedEmail: { type: string }
+        occurredAt: { type: string, format: date-time }
+        ip: { type: [string, 'null'] }
+        device: { type: [string, 'null'] }
+        result:
+          enum: [SUCCESS, INVALID_CREDENTIALS, PENDING, INACTIVE, BLOCKED]
+    PageResult:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items: { type: array, items: {} }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+    Money:
+      type: string
+      pattern: '^\d{1,12}\.\d{2}$'
+      examples: ['125.50']
+    Quantity:
+      type: string
+      pattern: '^\d{1,11}(\.\d{1,3})?$'
+      examples: ['10.500']
+    Destination:
+      type: object
+      required: [type]
+      properties:
+        type: { enum: [PROJECT, MOST_NEEDED] }
+        projectId: { type: string, format: uuid }
+    Dashboard:
+      type: object
+      required: [month, raised, spent, balance, activeDonors, expiringLots, byProject, recurringVsOneOff]
+      properties:
+        month: { type: string }
+        raised: { $ref: '#/components/schemas/Money' }
+        spent: { $ref: '#/components/schemas/Money' }
+        balance: { $ref: '#/components/schemas/Money' }
+        activeDonors: { type: integer }
+        expiringLots: { type: integer }
+        byProject: { type: array, items: { type: object } }
+        recurringVsOneOff: { type: object }
+    LedgerEntry:
+      type: object
+      required: [id, type, amount, currency, occurredOn, destination, method, status, origin]
+      properties:
+        id: { type: string, format: uuid }
+        type: { enum: [INCOME, EXPENSE] }
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { const: BRL }
+        occurredOn: { type: string, format: date }
+        donorId: { type: [string, 'null'], format: uuid }
+        donorName: { type: [string, 'null'] }
+        destination: { $ref: '#/components/schemas/Destination' }
+        method: { enum: [PIX, CARD, CASH, BOLETO] }
+        status: { enum: [PENDING, CONFIRMED] }
+        origin: { enum: [PUBLIC, ADMIN] }
+    ManualLedgerInput:
+      type: object
+      required: [type, amount, occurredOn, destination, method, status]
+      additionalProperties: false
+      properties:
+        type: { enum: [INCOME, EXPENSE] }
+        amount: { $ref: '#/components/schemas/Money' }
+        occurredOn: { type: string, format: date }
+        donorId: { type: string, format: uuid }
+        destination: { $ref: '#/components/schemas/Destination' }
+        method: { enum: [PIX, CARD, CASH, BOLETO] }
+        status: { enum: [PENDING, CONFIRMED] }
+    DonorSummary:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+        relationshipType: { enum: [ONE_OFF, RECURRING, IN_KIND] }
+        origin: { enum: [PUBLIC, IN_PERSON, ADMIN] }
+        reviewStatus: { enum: [CLEAR, PENDING_REVIEW] }
+    DonorDetail:
+      allOf:
+        - $ref: '#/components/schemas/DonorSummary'
+        - type: object
+          properties:
+            documentMasked: { type: [string, 'null'] }
+            timeline: { type: array, items: { type: object } }
+            subscriptions: { type: array, items: { type: object } }
+    Project:
+      type: object
+      required: [id, name, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        status: { enum: [ACTIVE, INACTIVE] }
+    InventoryItemInput:
+      type: object
+      required: [name, category, unit, averageUnitValue]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        category: { type: string, minLength: 1, maxLength: 80 }
+        unit: { enum: [KG, UNIT, LITER] }
+        averageUnitValue: { $ref: '#/components/schemas/Money' }
+    InventoryItem:
+      allOf:
+        - $ref: '#/components/schemas/InventoryItemInput'
+        - type: object
+          required: [id, status, accepted, priority]
+          properties:
+            id: { type: string, format: uuid }
+            status: { enum: [ACTIVE, INACTIVE] }
+            accepted: { type: boolean }
+            priority: { type: boolean }
+    InventoryLotInput:
+      type: object
+      required: [itemId, quantity, receivedOn]
+      properties:
+        itemId: { type: string, format: uuid }
+        quantity: { $ref: '#/components/schemas/Quantity' }
+        receivedOn: { type: string, format: date }
+        expiresOn: { type: [string, 'null'], format: date }
+        donorId: { type: string, format: uuid }
+        donorName: { type: string, maxLength: 160 }
+        estimatedValue: { $ref: '#/components/schemas/Money' }
+        valuationSource: { enum: [MANUAL, AVERAGE_AT_RECEIPT] }
+    InventoryLot:
+      allOf:
+        - $ref: '#/components/schemas/InventoryLotInput'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            availableQuantity: { $ref: '#/components/schemas/Quantity' }
+            status: { enum: [AVAILABLE, EXHAUSTED, DISCARDED] }
+            version: { type: integer }
+    MovementLine:
+      type: object
+      required: [lotId, quantity]
+      properties:
+        lotId: { type: string, format: uuid }
+        quantity: { $ref: '#/components/schemas/Quantity' }
+        lotVersion: { type: integer }
+    InventoryMovementInput:
+      type: object
+      required: [type, occurredOn, lines]
+      properties:
+        type: { enum: [DISTRIBUTION, DISCARD] }
+        occurredOn: { type: string, format: date }
+        projectId: { type: string, format: uuid }
+        reason: { type: string, maxLength: 1000 }
+        note: { type: string, maxLength: 1000 }
+        lines:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/MovementLine' }
+    InventoryMovement:
+      allOf:
+        - $ref: '#/components/schemas/InventoryMovementInput'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            createdAt: { type: string, format: date-time }
+    Document:
+      type: object
+      required: [id, generatedAt, downloadUrl]
+      properties:
+        id: { type: string, format: uuid }
+        generatedAt: { type: string, format: date-time }
+        downloadUrl: { type: string, format: uri-reference }
+    ReportSnapshot:
+      type: object
+      required: [from, to, totals, byProject, inventory]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        totals: { type: object }
+        byProject: { type: array, items: { type: object } }
+        inventory: { type: object }
+    ReportPublication:
+      type: object
+      required: [id, publishedAt, publishedBy, snapshot]
+      properties:
+        id: { type: string, format: uuid }
+        publishedAt: { type: string, format: date-time }
+        publishedBy: { type: string, format: uuid }
+        snapshot: { $ref: '#/components/schemas/ReportSnapshot' }
+        pdfUrl: { type: [string, 'null'], format: uri-reference }
