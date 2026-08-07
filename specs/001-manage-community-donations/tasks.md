@@ -38,18 +38,18 @@ incrementais. Todos os caminhos são relativos à raiz do repositório.
 
 **⚠️ CRITICAL**: Nenhuma história começa antes desta fase terminar.
 
-- [ ] T007 Configurar Prisma para PostgreSQL 18 e o cliente singleton em prisma/schema.prisma, prisma.config.ts e src/server/db/client.ts
-- [ ] T008 [P] Validar variáveis de banco, sessão, URL pública, documentos e contato da capela em src/server/config/env.ts e .env.example
-- [ ] T009 [P] Implementar envelope HTTP de sucesso/erro e mapeamento de exceções em src/server/http/errors.ts e src/server/http/responses.ts
-- [ ] T010 [P] Implementar esquemas Zod e normalizadores de e-mail, telefone, CPF/CNPJ, dinheiro, quantidade e datas em src/server/validation/common.ts
-- [ ] T011 [P] Implementar Argon2id, tokens aleatórios e hashing SHA-256 de segredos em src/server/auth/crypto.ts
-- [ ] T012 Criar modelos compartilhados User, Session, LoginAttempt, AccessLink, AuditEvent e Project em prisma/schema.prisma
-- [ ] T013 Criar migração-base com unicidade, checks, índices e timestamps UTC em prisma/migrations/001_foundation/migration.sql
-- [ ] T014 [P] Implementar auditoria append-only e logger JSON com redação de dados sensíveis em src/server/observability/audit.ts e src/server/observability/logger.ts
-- [ ] T015 [P] Criar primitivas acessíveis de botão, campo, alerta, modal e estado assíncrono em src/components/shared/Button.tsx, src/components/shared/Field.tsx, src/components/shared/Alert.tsx, src/components/shared/Dialog.tsx e src/components/shared/AsyncState.tsx
-- [ ] T016 Implementar carregamento de sessão, matriz RBAC, proteção CSRF por Origin e fronteira de rotas em src/server/auth/session.ts, src/server/auth/permissions.ts e src/proxy.ts
-- [ ] T017 [P] Criar utilitários de banco descartável, factories, autenticação e limpeza para testes em tests/helpers/database.ts, tests/helpers/factories.ts e tests/helpers/auth.ts
-- [ ] T018 Criar seed idempotente de administrador, projetos, catálogo e configurações públicas em prisma/seed.ts
+- [X] T007 Configurar Prisma para PostgreSQL 18 e o cliente singleton em prisma/schema.prisma, prisma.config.ts e src/server/db/client.ts
+- [X] T008 [P] Validar variáveis de banco, sessão, URL pública, documentos e contato da capela em src/server/config/env.ts e .env.example
+- [X] T009 [P] Implementar envelope HTTP de sucesso/erro e mapeamento de exceções em src/server/http/errors.ts e src/server/http/responses.ts
+- [X] T010 [P] Implementar esquemas Zod e normalizadores de e-mail, telefone, CPF/CNPJ, dinheiro, quantidade e datas em src/server/validation/common.ts
+- [X] T011 [P] Implementar Argon2id, tokens aleatórios e hashing SHA-256 de segredos em src/server/auth/crypto.ts
+- [X] T012 Criar modelos compartilhados User, Session, LoginAttempt, AccessLink, AuditEvent e Project em prisma/schema.prisma
+- [X] T013 Criar migração-base com unicidade, checks, índices e timestamps UTC em prisma/migrations/001_foundation/migration.sql
+- [X] T014 [P] Implementar auditoria append-only e logger JSON com redação de dados sensíveis em src/server/observability/audit.ts e src/server/observability/logger.ts
+- [X] T015 [P] Criar primitivas acessíveis de botão, campo, alerta, modal e estado assíncrono em src/components/shared/Button.tsx, src/components/shared/Field.tsx, src/components/shared/Alert.tsx, src/components/shared/Dialog.tsx e src/components/shared/AsyncState.tsx
+- [X] T016 Implementar carregamento de sessão, matriz RBAC, proteção CSRF por Origin e fronteira de rotas em src/server/auth/session.ts, src/server/auth/permissions.ts e src/proxy.ts
+- [X] T017 [P] Criar utilitários de banco descartável, factories, autenticação e limpeza para testes em tests/helpers/database.ts, tests/helpers/factories.ts e tests/helpers/auth.ts
+- [X] T018 Criar seed idempotente de administrador, projetos, catálogo e configurações públicas em prisma/seed.ts
 
 **Checkpoint**: Foundation pronta; migrações aplicam do zero, seed é repetível e rotas administrativas negam sessão ausente.
 
