@@ -19,6 +19,18 @@ function unauthenticated(request: NextRequest): NextResponse {
 
 export function proxy(request: NextRequest): NextResponse {
   if (request.nextUrl.pathname === "/admin/login") return NextResponse.next();
+
+  if (request.nextUrl.pathname === "/api/admin/auth/login") {
+    if (!hasTrustedOrigin(request, process.env.APP_URL ?? request.nextUrl.origin)) {
+      return NextResponse.json(
+        { error: { code: "CSRF_ORIGIN_MISMATCH", message: "Origem da solicitação não autorizada" } },
+        { status: 403 },
+      );
+    }
+
+    return NextResponse.next();
+  }
+
   if (!request.cookies.has(SESSION_COOKIE_NAME)) return unauthenticated(request);
 
   if (

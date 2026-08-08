@@ -10,7 +10,7 @@ const validEnv = {
   CHAPEL_CONTACT_EMAIL: "contato@example.org",
   CHAPEL_CONTACT_PHONE: "5585999999999",
   SEED_ADMIN_EMAIL: "admin@example.org",
-  SEED_ADMIN_PASSWORD: "a-secure-test-password",
+  SEED_ADMIN_PASSWORD: "a-secure-test-password1",
 };
 
 describe("getServerEnv", () => {
@@ -26,5 +26,17 @@ describe("getServerEnv", () => {
     expect(() =>
       getServerEnv({ ...validEnv, DATABASE_URL: "not-a-database-url" }),
     ).toThrow("Invalid server environment variables: DATABASE_URL");
+  });
+
+  it("accepts the eight-character password policy used by administrator accounts", () => {
+    const env = getServerEnv({ ...validEnv, SEED_ADMIN_PASSWORD: "P!ssw0rd" });
+
+    expect(env.SEED_ADMIN_PASSWORD).toBe("P!ssw0rd");
+  });
+
+  it("rejects seed passwords without both letters and numbers", () => {
+    expect(() =>
+      getServerEnv({ ...validEnv, SEED_ADMIN_PASSWORD: "password-only" }),
+    ).toThrow("Invalid server environment variables: SEED_ADMIN_PASSWORD");
   });
 });

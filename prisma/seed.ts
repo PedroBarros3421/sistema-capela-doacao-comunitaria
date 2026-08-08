@@ -102,7 +102,21 @@ async function main() {
 
 main()
   .catch((error: unknown) => {
-    console.error(JSON.stringify({ event: "database.seed.failed", error: (error as Error).name }));
+    const safeMessage = error instanceof Error &&
+      error.message.startsWith("Invalid server environment variables:")
+      ? error.message
+      : undefined;
+    const code = typeof error === "object" && error !== null && "code" in error &&
+      typeof error.code === "string"
+      ? error.code
+      : undefined;
+
+    console.error(JSON.stringify({
+      event: "database.seed.failed",
+      error: error instanceof Error ? error.name : "UnknownError",
+      ...(safeMessage ? { message: safeMessage } : {}),
+      ...(code ? { code } : {}),
+    }));
     process.exitCode = 1;
   })
   .finally(async () => {

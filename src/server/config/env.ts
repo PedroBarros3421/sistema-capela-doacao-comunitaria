@@ -14,7 +14,7 @@ export const serverEnvSchema = z.object({
   CHAPEL_CONTACT_PHONE: nonEmpty,
   SEED_ADMIN_NAME: nonEmpty.default("Administrador da Capela"),
   SEED_ADMIN_EMAIL: z.email(),
-  SEED_ADMIN_PASSWORD: z.string().min(12),
+  SEED_ADMIN_PASSWORD: z.string().min(8).regex(/(?=.*[A-Za-z])(?=.*\d)/),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
