@@ -63,7 +63,7 @@ export function LedgerForm({ onSuccess }: Props) {
   const submitting = state.status === "submitting";
 
   return (
-    <form onSubmit={handleSubmit} noValidate aria-label="Novo lançamento manual">
+    <form className="ledger-entry-form" onSubmit={handleSubmit} noValidate aria-label="Novo lançamento manual">
       <fieldset disabled={submitting}>
         <legend>Novo lançamento</legend>
 

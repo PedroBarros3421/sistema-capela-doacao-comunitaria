@@ -8,18 +8,19 @@ import type { UserRole } from "@prisma/client";
 type NavItem = {
   label: string;
   href: string;
+  icon: string;
   requiredRole?: UserRole[];
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Painel", href: "/admin" },
-  { label: "Financeiro", href: "/admin/financeiro", requiredRole: ["GENERAL_ADMIN", "FINANCE"] },
-  { label: "Estoque", href: "/admin/estoque", requiredRole: ["GENERAL_ADMIN", "INVENTORY_VOLUNTEER"] },
-  { label: "Doadores", href: "/admin/doadores", requiredRole: ["GENERAL_ADMIN", "FINANCE"] },
-  { label: "Relatórios", href: "/admin/relatorios", requiredRole: ["GENERAL_ADMIN", "FINANCE"] },
-  { label: "Usuários", href: "/admin/usuarios", requiredRole: ["GENERAL_ADMIN"] },
-  { label: "Projetos", href: "/admin/projetos", requiredRole: ["GENERAL_ADMIN"] },
-  { label: "Acessos", href: "/admin/acessos", requiredRole: ["GENERAL_ADMIN"] },
+  { label: "Painel", href: "/admin", icon: "▦" },
+  { label: "Financeiro", href: "/admin/financeiro", icon: "R$", requiredRole: ["GENERAL_ADMIN", "FINANCE"] },
+  { label: "Estoque", href: "/admin/estoque", icon: "□", requiredRole: ["GENERAL_ADMIN", "INVENTORY_VOLUNTEER"] },
+  { label: "Doadores", href: "/admin/doadores", icon: "♡", requiredRole: ["GENERAL_ADMIN", "FINANCE"] },
+  { label: "Relatórios", href: "/admin/relatorios", icon: "≡", requiredRole: ["GENERAL_ADMIN", "FINANCE"] },
+  { label: "Usuários", href: "/admin/usuarios", icon: "○", requiredRole: ["GENERAL_ADMIN"] },
+  { label: "Projetos", href: "/admin/projetos", icon: "◇", requiredRole: ["GENERAL_ADMIN"] },
+  { label: "Acessos", href: "/admin/acessos", icon: "↗", requiredRole: ["GENERAL_ADMIN"] },
 ];
 
 type Props = {
@@ -40,7 +41,7 @@ export function AdminNavigation({ userRole }: Props) {
   }
 
   return (
-    <nav aria-label="Menu administrativo">
+    <nav className="admin-nav" aria-label="Menu administrativo">
       <ul role="list">
         {visibleItems.map((item) => (
           <li key={item.href}>
@@ -48,6 +49,7 @@ export function AdminNavigation({ userRole }: Props) {
               href={item.href}
               aria-current={pathname === item.href ? "page" : undefined}
             >
+              <span className="admin-nav__icon" aria-hidden="true">{item.icon}</span>
               {item.label}
             </Link>
           </li>
@@ -55,8 +57,14 @@ export function AdminNavigation({ userRole }: Props) {
       </ul>
 
       <div className="admin-nav__footer">
-        <Link href="/admin/perfil">Meu perfil</Link>
-        <button type="button" onClick={handleLogout}>Sair</button>
+        <Link href="/admin/perfil">
+          <span className="admin-nav__icon" aria-hidden="true">●</span>
+          Meu perfil
+        </Link>
+        <button type="button" onClick={handleLogout}>
+          <span className="admin-nav__icon" aria-hidden="true">←</span>
+          Sair
+        </button>
       </div>
     </nav>
   );

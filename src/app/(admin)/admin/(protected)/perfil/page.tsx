@@ -97,16 +97,18 @@ export default function PerfilPage() {
   }
 
   if (!user) {
-    return <p aria-busy="true">Carregando perfil…</p>;
+    return <p className="admin-loading-state" aria-busy="true">Carregando perfil…</p>;
   }
 
   return (
     <div className="admin-profile-page">
       <header>
+        <p className="page-header__eyebrow">Sua conta</p>
         <h1>Meu Perfil</h1>
+        <p className="page-header__description">Gerencie seus dados e credenciais de acesso.</p>
         <dl className="admin-profile-meta">
-          <dt>E-mail</dt><dd>{user.email}</dd>
-          <dt>Papel</dt><dd>{ROLE_LABELS[user.role] ?? user.role}</dd>
+          <div><dt>E-mail</dt><dd>{user.email}</dd></div>
+          <div><dt>Papel</dt><dd>{ROLE_LABELS[user.role] ?? user.role}</dd></div>
         </dl>
       </header>
 

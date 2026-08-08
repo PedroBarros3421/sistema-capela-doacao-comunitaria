@@ -47,9 +47,11 @@ function LoginForm() {
   }
 
   return (
-    <main className="admin-login-page">
+    <main className="admin-login-page" data-theme="admin">
       <div className="admin-login-card">
         <header>
+          <span className="admin-login-card__mark" aria-hidden="true">C</span>
+          <p className="admin-login-card__eyebrow">Capela Comunitária</p>
           <h1>Acesso ao painel</h1>
           <p>Área restrita à equipe interna da Capela.</p>
         </header>
@@ -98,7 +100,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="admin-login-page" aria-busy="true" />}>
+    <Suspense fallback={<main className="admin-login-page" data-theme="admin" aria-busy="true" />}>
       <LoginForm />
     </Suspense>
   );

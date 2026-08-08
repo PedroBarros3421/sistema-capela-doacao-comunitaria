@@ -44,7 +44,11 @@ export default function AdminDashboardPage() {
   return (
     <div className="admin-dashboard-page">
       <header className="page-header">
-        <h1>Painel</h1>
+        <div>
+          <p className="page-header__eyebrow">Visão geral</p>
+          <h1>Painel</h1>
+          <p className="page-header__description">Acompanhe os principais indicadores da Capela.</p>
+        </div>
         <div className="page-header__controls">
           <label htmlFor="month-picker">Mês</label>
           <input
@@ -61,7 +65,7 @@ export default function AdminDashboardPage() {
       </header>
 
       {state.status === "loading" && (
-        <p aria-busy="true" aria-live="polite">Carregando indicadores…</p>
+        <p className="admin-loading-state" aria-busy="true" aria-live="polite">Carregando indicadores…</p>
       )}
 
       {state.status === "error" && (

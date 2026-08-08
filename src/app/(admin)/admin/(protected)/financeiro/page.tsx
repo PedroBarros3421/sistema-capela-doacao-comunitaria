@@ -74,7 +74,11 @@ export default function FinanceiroPage() {
   return (
     <div className="admin-financeiro-page">
       <header className="page-header">
-        <h1>Livro-caixa</h1>
+        <div>
+          <p className="page-header__eyebrow">Financeiro</p>
+          <h1>Livro-caixa</h1>
+          <p className="page-header__description">Consulte movimentações e registre lançamentos manuais.</p>
+        </div>
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
@@ -86,7 +90,7 @@ export default function FinanceiroPage() {
       </header>
 
       {showForm && (
-        <section id="ledger-form-panel" aria-labelledby="form-heading">
+        <section id="ledger-form-panel" className="ledger-form-panel" aria-labelledby="form-heading">
           <h2 id="form-heading" className="sr-only">Formulário de novo lançamento</h2>
           <LedgerForm
             onSuccess={() => {
