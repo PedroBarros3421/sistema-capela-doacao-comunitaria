@@ -98,22 +98,22 @@ por administrador e validar convite/redefinição reutilizáveis e revogáveis.
 
 ### Tests for User Story 2
 
-- [ ] T034 [P] [US2] Validar contratos de login, logout, perfil, convite e redefinição em tests/contract/admin-auth.contract.test.ts
-- [ ] T035 [P] [US2] Testar hash Argon2id, sessões opacas, expiração, revogação e bloqueio na quinta falha em tests/integration/admin-auth.test.ts
-- [ ] T036 [P] [US2] Testar negação por papel e alteração imediata de status/papel em acesso direto em tests/integration/rbac-boundary.test.ts
-- [ ] T037 [P] [US2] Testar login, mensagens de estado, recuperação genérica e menus por papel em tests/e2e/admin-auth-rbac.spec.ts
+- [X] T034 [P] [US2] Validar contratos de login, logout, perfil, convite e redefinição em tests/contract/admin-auth.contract.test.ts
+- [X] T035 [P] [US2] Testar hash Argon2id, sessões opacas, expiração, revogação e bloqueio na quinta falha em tests/integration/admin-auth.test.ts
+- [X] T036 [P] [US2] Testar negação por papel e alteração imediata de status/papel em acesso direto em tests/integration/rbac-boundary.test.ts
+- [X] T037 [P] [US2] Testar login, mensagens de estado, recuperação genérica e menus por papel em tests/e2e/admin-auth-rbac.spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T038 [P] [US2] Implementar repositórios de usuário, sessão, tentativa e link em src/server/domains/users/user-repository.ts e src/server/auth/auth-repository.ts
-- [ ] T039 [US2] Implementar login com contagem consecutiva, bloqueio, criação de sessão e auditoria em src/server/auth/login-service.ts
-- [ ] T040 [US2] Implementar logout, troca de senha, revogação de sessões e consulta do perfil em src/server/auth/account-service.ts
-- [ ] T041 [US2] Implementar convite/redefinição reutilizáveis por 30 dias e outbox simulada em src/server/auth/password-links.ts e src/server/integrations/notification-simulator.ts
-- [ ] T042 [US2] Implementar endpoints públicos de convite e reset sem enumeração em src/app/api/public/access/invitation/route.ts, src/app/api/public/access/password-reset-requests/route.ts e src/app/api/public/access/password-reset/route.ts
-- [ ] T043 [US2] Implementar endpoints de login, logout, perfil e senha em src/app/api/admin/auth/login/route.ts, src/app/api/admin/auth/logout/route.ts, src/app/api/admin/me/route.ts e src/app/api/admin/me/password/route.ts
-- [ ] T044 [P] [US2] Criar telas de login, solicitação e definição de senha em src/app/(admin)/admin/login/page.tsx, src/app/(public)/acesso/redefinir/page.tsx e src/app/(public)/acesso/convite/page.tsx
-- [ ] T045 [US2] Criar shell administrativo e menu filtrado por papel em src/app/(admin)/admin/layout.tsx, src/components/admin/AdminShell.tsx e src/components/admin/AdminNavigation.tsx
-- [ ] T046 [US2] Criar página Meu Perfil com dados básicos e troca de senha em src/app/(admin)/admin/perfil/page.tsx
+- [X] T038 [P] [US2] Implementar repositórios de usuário, sessão, tentativa e link em src/server/domains/users/user-repository.ts e src/server/auth/auth-repository.ts
+- [X] T039 [US2] Implementar login com contagem consecutiva, bloqueio, criação de sessão e auditoria em src/server/auth/login-service.ts
+- [X] T040 [US2] Implementar logout, troca de senha, revogação de sessões e consulta do perfil em src/server/auth/account-service.ts
+- [X] T041 [US2] Implementar convite/redefinição reutilizáveis por 30 dias e outbox simulada em src/server/auth/password-links.ts e src/server/integrations/notification-simulator.ts
+- [X] T042 [US2] Implementar endpoints públicos de convite e reset sem enumeração em src/app/api/public/access/invitation/route.ts, src/app/api/public/access/password-reset-requests/route.ts e src/app/api/public/access/password-reset/route.ts
+- [X] T043 [US2] Implementar endpoints de login, logout, perfil e senha em src/app/api/admin/auth/login/route.ts, src/app/api/admin/auth/logout/route.ts, src/app/api/admin/me/route.ts e src/app/api/admin/me/password/route.ts
+- [X] T044 [P] [US2] Criar telas de login, solicitação e definição de senha em src/app/(admin)/admin/login/page.tsx, src/app/(public)/acesso/redefinir/page.tsx e src/app/(public)/acesso/convite/page.tsx
+- [X] T045 [US2] Criar shell administrativo e menu filtrado por papel em src/app/(admin)/admin/layout.tsx, src/components/admin/AdminShell.tsx e src/components/admin/AdminNavigation.tsx
+- [X] T046 [US2] Criar página Meu Perfil com dados básicos e troca de senha em src/app/(admin)/admin/perfil/page.tsx
 
 **Checkpoint**: US2 protege `/admin` de forma independente e fornece uma área interna vazia, mas segura, para os demais módulos.
 
