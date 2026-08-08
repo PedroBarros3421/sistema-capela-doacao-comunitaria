@@ -188,16 +188,16 @@ segundos; a tela nunca oferece cadastro de lote.
 
 ### Tests for User Story 5
 
-- [ ] T070 [P] [US5] Validar contratos de atualização administrativa e lista pública de itens em tests/contract/accepted-items.contract.test.ts
-- [ ] T071 [P] [US5] Testar consistência imediata, prioridade e item pausado em tests/integration/accepted-items.test.ts
-- [ ] T072 [P] [US5] Testar configuração no admin e orientação pública sem formulário de lote em tests/e2e/accepted-items.spec.ts
+- [X] T070 [P] [US5] Validar contratos de atualização administrativa e lista pública de itens em tests/contract/accepted-items.contract.test.ts
+- [X] T071 [P] [US5] Testar consistência imediata, prioridade e item pausado em tests/integration/accepted-items.test.ts
+- [X] T072 [P] [US5] Testar configuração no admin e orientação pública sem formulário de lote em tests/e2e/accepted-items.spec.ts
 
 ### Implementation for User Story 5
 
-- [ ] T073 [US5] Implementar regras aceito/pausado/prioridade e projeção pública ordenada em src/server/domains/inventory/accepted-items-service.ts
-- [ ] T074 [US5] Implementar atualização parcial do item/configuração em src/app/api/admin/inventory/items/[itemId]/route.ts
-- [ ] T075 [US5] Implementar endpoint público sem dados internos em src/app/api/public/accepted-items/route.ts
-- [ ] T076 [US5] Criar configuração administrativa e página pública de entrega em src/app/(admin)/admin/estoque/itens-aceitos/page.tsx e src/app/(public)/doar/itens/page.tsx
+- [X] T073 [US5] Implementar regras aceito/pausado/prioridade e projeção pública ordenada em src/server/domains/inventory/accepted-items-service.ts
+- [X] T074 [US5] Implementar atualização parcial do item/configuração em src/app/api/admin/inventory/items/[itemId]/route.ts
+- [X] T075 [US5] Implementar endpoint público sem dados internos em src/app/api/public/accepted-items/route.ts
+- [X] T076 [US5] Criar configuração administrativa e página pública de entrega em src/app/(admin)/admin/estoque/itens-aceitos/page.tsx e src/app/(public)/doar/itens/page.tsx
 
 **Checkpoint**: US5 conecta a necessidade operacional ao doador sem criar recebimento público.
 
