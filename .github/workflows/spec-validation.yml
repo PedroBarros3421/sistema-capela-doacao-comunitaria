@@ -1,0 +1,94 @@
+name: Spec Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-spec-change:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze spec changes
+        id: analysis
+        run: |
+          CHANGED_FILES=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}" "origin/${{ github.event.pull_request.head.ref }}")
+          echo "Arquivos alterados nesta PR:"
+          echo "$CHANGED_FILES"
+
+          FEATURE_DIRS=$(echo "$CHANGED_FILES" | grep -oE '^specs/[^/]+' | sort -u)
+
+          SPEC_CHANGED=false
+          MISSING_DOCS=""
+
+          for dir in $FEATURE_DIRS; do
+            SPEC_CHANGED_HERE=false
+            if echo "$CHANGED_FILES" | grep -qx "$dir/spec.md"; then
+              SPEC_CHANGED_HERE=true
+              SPEC_CHANGED=true
+            fi
+
+            if [ "$SPEC_CHANGED_HERE" = true ]; then
+              # Item 1: spec.md alterado exige plan.md e tasks.md presentes.
+              for required in plan.md tasks.md; do
+                if [ ! -f "$dir/$required" ]; then
+                  echo "::error::$dir/$required não existe, mas $dir/spec.md foi alterado."
+                  MISSING_DOCS="$MISSING_DOCS $dir/$required"
+                fi
+              done
+            else
+              # Item 2: plan.md/tasks.md alterados sem alteração correspondente em spec.md (aviso apenas).
+              for f in plan.md tasks.md; do
+                if echo "$CHANGED_FILES" | grep -qx "$dir/$f"; then
+                  echo "::warning::$dir/$f foi alterado sem alteração em $dir/spec.md nesta PR. Verifique se a especificação precisa ser sincronizada."
+                fi
+              done
+            fi
+          done
+
+          echo "spec_changed=$SPEC_CHANGED" >> "$GITHUB_OUTPUT"
+          echo "missing_docs=$(echo $MISSING_DOCS | xargs)" >> "$GITHUB_OUTPUT"
+
+      - name: Log when spec.md was not changed
+        if: steps.analysis.outputs.spec_changed == 'false'
+        run: echo "Nenhum spec.md foi alterado neste Pull Request."
+
+      - name: Comment on Pull Request
+        if: steps.analysis.outputs.spec_changed == 'true' || steps.analysis.outputs.missing_docs != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const specChanged = "${{ steps.analysis.outputs.spec_changed }}" === "true";
+            const missingDocs = "${{ steps.analysis.outputs.missing_docs }}".trim();
+
+            let body = "";
+
+            if (specChanged) {
+              body += "A especificação foi modificada. A CI detectou a alteração com sucesso.\n";
+            }
+
+            if (missingDocs) {
+              body += "\n⚠️ **Documentos obrigatórios ausentes:**\n";
+              for (const doc of missingDocs.split(" ")) {
+                body += `- \`${doc}\` não foi encontrado, mas o \`spec.md\` correspondente foi alterado.\n`;
+              }
+            }
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail if required documents are missing
+        if: steps.analysis.outputs.missing_docs != ''
+        run: |
+          echo "Falhando o build: documentos obrigatórios ausentes para spec.md alterado."
+          exit 1
