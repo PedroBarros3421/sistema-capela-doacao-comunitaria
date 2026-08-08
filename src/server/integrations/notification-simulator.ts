@@ -12,7 +12,13 @@ type InvitationNotification = {
   payload: { invitationUrl: string; userName: string };
 };
 
-type Notification = PasswordResetNotification | InvitationNotification;
+type DonorAccountAccessNotification = {
+  type: "DONOR_ACCOUNT_ACCESS";
+  to: string;
+  payload: { accessUrl: string };
+};
+
+type Notification = PasswordResetNotification | InvitationNotification | DonorAccountAccessNotification;
 
 export function simulateNotification(notification: Notification): void {
   logger.info("notification.simulated", {

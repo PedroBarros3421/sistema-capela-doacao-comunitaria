@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, rename, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, join, resolve, sep } from "node:path";
 
 import type { PrismaClient } from "@prisma/client";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
@@ -69,4 +69,14 @@ export async function generateDonationReceipt(entryId: string, options: ReceiptO
       contentSha256: createHash("sha256").update(bytes).digest("hex"),
     },
   });
+}
+
+export async function readDonationReceiptFile(receiptId: string, options: ReceiptOptions) {
+  const client = options.client ?? db;
+  const receipt = await client.donationReceipt.findUnique({ where: { id: receiptId } });
+  if (!receipt) throw new NotFoundError("Recibo não encontrado");
+  const storageRoot = resolve(options.storagePath);
+  const filePath = resolve(storageRoot, receipt.filePath);
+  if (!filePath.startsWith(`${storageRoot}${sep}`)) throw new NotFoundError("Recibo não encontrado");
+  return { receipt, bytes: await readFile(filePath) };
 }
