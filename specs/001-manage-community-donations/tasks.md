@@ -129,18 +129,18 @@ tabela e cria lançamento manual; voluntário recebe negação.
 
 ### Tests for User Story 3
 
-- [ ] T047 [P] [US3] Validar contratos de dashboard e livro-caixa em tests/contract/admin-finance.contract.test.ts
-- [ ] T048 [P] [US3] Testar decimal exato, saldo, doador ativo, filtros e auditoria manual em tests/integration/finance-dashboard.test.ts
-- [ ] T049 [P] [US3] Testar KPIs, origem pública, filtros, estados vazios e novo lançamento em tests/e2e/admin-finance.spec.ts
+- [X] T047 [P] [US3] Validar contratos de dashboard e livro-caixa em tests/contract/admin-finance.contract.test.ts
+- [X] T048 [P] [US3] Testar decimal exato, saldo, doador ativo, filtros e auditoria manual em tests/integration/finance-dashboard.test.ts
+- [X] T049 [P] [US3] Testar KPIs, origem pública, filtros, estados vazios e novo lançamento em tests/e2e/admin-finance.spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T050 [P] [US3] Implementar consultas paginadas e filtros do livro-caixa em src/server/domains/finance/ledger-repository.ts
-- [ ] T051 [US3] Implementar lançamento manual e entrada compensatória imutável com auditoria em src/server/domains/finance/manual-ledger-service.ts
-- [ ] T052 [US3] Implementar agregações mensais, saldo e definição de doador ativo em src/server/domains/finance/dashboard-service.ts
-- [ ] T053 [US3] Implementar endpoints de dashboard e livro-caixa em src/app/api/admin/dashboard/route.ts e src/app/api/admin/ledger/route.ts
-- [ ] T054 [P] [US3] Criar dashboard com KPIs e gráficos acessíveis por projeto/tipo em src/app/(admin)/admin/page.tsx e src/components/admin/DashboardCharts.tsx
-- [ ] T055 [US3] Criar livro-caixa com filtros, selo de origem e formulário manual em src/app/(admin)/admin/financeiro/page.tsx, src/components/admin/LedgerTable.tsx e src/components/admin/LedgerForm.tsx
+- [X] T050 [P] [US3] Implementar consultas paginadas e filtros do livro-caixa em src/server/domains/finance/ledger-repository.ts
+- [X] T051 [US3] Implementar lançamento manual e entrada compensatória imutável com auditoria em src/server/domains/finance/manual-ledger-service.ts
+- [X] T052 [US3] Implementar agregações mensais, saldo e definição de doador ativo em src/server/domains/finance/dashboard-service.ts
+- [X] T053 [US3] Implementar endpoints de dashboard e livro-caixa em src/app/api/admin/dashboard/route.ts e src/app/api/admin/ledger/route.ts
+- [X] T054 [P] [US3] Criar dashboard com KPIs e gráficos acessíveis por projeto/tipo em src/app/(admin)/admin/page.tsx e src/components/admin/DashboardCharts.tsx
+- [X] T055 [US3] Criar livro-caixa com filtros, selo de origem e formulário manual em src/app/(admin)/admin/financeiro/page.tsx, src/components/admin/LedgerTable.tsx e src/components/admin/LedgerForm.tsx
 
 **Checkpoint**: US1 + US2 + US3 formam o MVP operacional: doar, acessar com segurança e visualizar no caixa.
 
