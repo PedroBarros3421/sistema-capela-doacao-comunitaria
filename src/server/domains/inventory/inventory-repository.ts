@@ -15,6 +15,14 @@ const itemSchema = z.object({
   averageUnitValue: moneySchema,
 }).strict();
 
+const itemUpdateSchema = z.object({
+  name: z.string().trim().min(1).max(120).optional(),
+  category: z.string().trim().min(1).max(80).optional(),
+  unit: z.enum(["KG", "UNIT", "LITER"]).optional(),
+  averageUnitValue: moneySchema.optional(),
+  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
+}).partial();
+
 const lotSchema = z.object({
   itemId: z.string().uuid(),
   quantity: quantitySchema,
@@ -97,6 +105,42 @@ export async function createInventoryItem(actorUserId: string, rawInput: unknown
     averageUnitValue: item.averageUnitValue.toFixed(2), status: item.status,
     accepted: item.acceptedConfig?.accepted ?? false, priority: item.acceptedConfig?.priority ?? false,
   };
+}
+
+function serializeInventoryItem(item: Prisma.InventoryItemGetPayload<{ include: { acceptedConfig: true } }>) {
+  return {
+    id: item.id,
+    name: item.name,
+    category: item.category,
+    unit: item.unit,
+    averageUnitValue: item.averageUnitValue.toFixed(2),
+    status: item.status,
+    accepted: item.acceptedConfig?.accepted ?? false,
+    priority: item.acceptedConfig?.priority ?? false,
+  };
+}
+
+export async function getInventoryItem(itemId: string, client: Prisma.TransactionClient = db) {
+  const item = await client.inventoryItem.findUnique({ where: { id: itemId }, include: { acceptedConfig: true } });
+  if (!item) throw new NotFoundError("Item não encontrado");
+  return serializeInventoryItem(item);
+}
+
+export async function updateInventoryCatalog(itemId: string, rawInput: unknown, client: Prisma.TransactionClient = db) {
+  const input = itemUpdateSchema.parse(rawInput);
+  if (Object.values(input).every((value) => value === undefined)) return;
+  const existing = await client.inventoryItem.findUnique({ where: { id: itemId } });
+  if (!existing) throw new NotFoundError("Item não encontrado");
+  await client.inventoryItem.update({
+    where: { id: itemId },
+    data: {
+      name: input.name,
+      category: input.category,
+      unit: input.unit,
+      averageUnitValue: input.averageUnitValue,
+      status: input.status,
+    },
+  });
 }
 
 export async function createInventoryLot(actorUserId: string, rawInput: unknown, client: PrismaClient = db) {
