@@ -10,6 +10,7 @@ type Configuration = {
 };
 
 const UNIT_LABELS: Record<string, string> = { KG: "quilos", UNIT: "unidades", LITER: "litros" };
+const UNIT_ICONS: Record<string, string> = { KG: "KG", UNIT: "UN", LITER: "L" };
 
 export default function DoarItensPage() {
   const [items, setItems] = useState<AcceptedItem[] | null>(null);
@@ -48,18 +49,24 @@ export default function DoarItensPage() {
         <ul className="accepted-items-list" aria-label="Itens aceitos no momento">
           {items.map((item) => (
             <li key={item.id} className={item.priority ? "accepted-item accepted-item--priority" : "accepted-item"}>
+              <span className="accepted-item__top">
+                <span className="accepted-item__icon" aria-hidden="true">{UNIT_ICONS[item.unit] ?? item.unit}</span>
+                {item.priority ? <span className="accepted-item__badge">Necessidade prioritária</span> : null}
+              </span>
               <strong>{item.name}</strong>
-              <span>{item.category} · {UNIT_LABELS[item.unit] ?? item.unit}</span>
-              {item.priority ? <span className="accepted-item__badge">Necessidade prioritária</span> : null}
+              <span className="accepted-item__meta">{item.category} · por {UNIT_LABELS[item.unit] ?? item.unit}</span>
             </li>
           ))}
         </ul>
       )}
       {configuration ? (
         <section aria-label="Onde entregar" className="donor-delivery-info">
-          <h2>Onde entregar</h2>
-          <p>{configuration.itemDelivery.address}</p>
-          <p>{configuration.itemDelivery.instructions}</p>
+          <span className="donor-delivery-info__icon" aria-hidden="true">⌂</span>
+          <div>
+            <h2>Onde entregar</h2>
+            <p>{configuration.itemDelivery.address}</p>
+            <p>{configuration.itemDelivery.instructions}</p>
+          </div>
         </section>
       ) : null}
       <div id="ajuda"><VolunteerHelp contact={configuration?.volunteerHelp.contact} /></div>
