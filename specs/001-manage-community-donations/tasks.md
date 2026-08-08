@@ -213,24 +213,24 @@ válido mostra apenas o próprio histórico e altera, pausa, retoma ou cancela r
 
 ### Tests for User Story 6
 
-- [ ] T077 [P] [US6] Validar contratos de doadores, revisões, conta e recorrências em tests/contract/donors-account.contract.test.ts
-- [ ] T078 [P] [US6] Testar prioridade de matching, conflito e merge auditado em tests/integration/donor-matching.test.ts
-- [ ] T079 [P] [US6] Testar posse, escopo, reutilização, expiração e revogação do link pessoal em tests/integration/donor-account-links.test.ts
-- [ ] T080 [P] [US6] Testar transições e preservação do histórico recorrente em tests/integration/recurring-subscriptions.test.ts
-- [ ] T081 [P] [US6] Testar lista/timeline/revisão no admin e Minha Conta pública em tests/e2e/donors-account.spec.ts
+- [X] T077 [P] [US6] Validar contratos de doadores, revisões, conta e recorrências em tests/contract/donors-account.contract.test.ts
+- [X] T078 [P] [US6] Testar prioridade de matching, conflito e merge auditado em tests/integration/donor-matching.test.ts
+- [X] T079 [P] [US6] Testar posse, escopo, reutilização, expiração e revogação do link pessoal em tests/integration/donor-account-links.test.ts
+- [X] T080 [P] [US6] Testar transições e preservação do histórico recorrente em tests/integration/recurring-subscriptions.test.ts
+- [X] T081 [P] [US6] Testar lista/timeline/revisão no admin e Minha Conta pública em tests/e2e/donors-account.spec.ts
 
 ### Implementation for User Story 6
 
-- [ ] T082 [US6] Adicionar DonorMatchReview e campos de revisão/merge ao modelo em prisma/schema.prisma
-- [ ] T083 [US6] Criar índices de matching e constraints de resolução em prisma/migrations/004_donor_reviews/migration.sql
-- [ ] T084 [US6] Completar matching para criar doador provisório e revisão em conflitos em src/server/domains/donors/match-donor.ts
-- [ ] T085 [US6] Implementar keep-separate/merge transacional com redirecionamento de referências em src/server/domains/donors/review-service.ts
-- [ ] T086 [P] [US6] Implementar busca, detalhe, timeline e mascaramento em src/server/domains/donors/donor-query-service.ts
-- [ ] T087 [P] [US6] Implementar alterar valor, pausar, retomar e cancelar recorrência em src/server/domains/donors/subscription-service.ts
-- [ ] T088 [US6] Implementar solicitação genérica e validação adicional por contato para Minha Conta em src/server/domains/donors/account-access-service.ts
-- [ ] T089 [US6] Implementar endpoints administrativos de doadores e revisões em src/app/api/admin/donors/route.ts, src/app/api/admin/donors/[donorId]/route.ts, src/app/api/admin/donor-match-reviews/route.ts e src/app/api/admin/donor-match-reviews/[reviewId]/resolution/route.ts
-- [ ] T090 [US6] Implementar endpoints públicos de acesso, conta, recorrência e recibo próprio em src/app/api/public/account/access-requests/route.ts, src/app/api/public/account/route.ts, src/app/api/public/account/subscriptions/[subscriptionId]/route.ts e src/app/api/public/account/receipts/[receiptId]/route.ts
-- [ ] T091 [US6] Criar gestão administrativa e Minha Conta acessível em src/app/(admin)/admin/doadores/page.tsx, src/app/(admin)/admin/doadores/[donorId]/page.tsx, src/app/(admin)/admin/doadores/revisoes/page.tsx e src/app/(public)/doar/minha-conta/page.tsx
+- [X] T082 [US6] Adicionar DonorMatchReview e campos de revisão/merge ao modelo em prisma/schema.prisma
+- [X] T083 [US6] Criar índices de matching e constraints de resolução em prisma/migrations/004_donor_reviews/migration.sql
+- [X] T084 [US6] Completar matching para criar doador provisório e revisão em conflitos em src/server/domains/donors/match-donor.ts
+- [X] T085 [US6] Implementar keep-separate/merge transacional com redirecionamento de referências em src/server/domains/donors/review-service.ts
+- [X] T086 [P] [US6] Implementar busca, detalhe, timeline e mascaramento em src/server/domains/donors/donor-query-service.ts
+- [X] T087 [P] [US6] Implementar alterar valor, pausar, retomar e cancelar recorrência em src/server/domains/donors/subscription-service.ts
+- [X] T088 [US6] Implementar solicitação genérica e validação adicional por contato para Minha Conta em src/server/domains/donors/account-access-service.ts
+- [X] T089 [US6] Implementar endpoints administrativos de doadores e revisões em src/app/api/admin/donors/route.ts, src/app/api/admin/donors/[donorId]/route.ts, src/app/api/admin/donor-match-reviews/route.ts e src/app/api/admin/donor-match-reviews/[reviewId]/resolution/route.ts
+- [X] T090 [US6] Implementar endpoints públicos de acesso, conta, recorrência e recibo próprio em src/app/api/public/account/access-requests/route.ts, src/app/api/public/account/route.ts, src/app/api/public/account/subscriptions/[subscriptionId]/route.ts e src/app/api/public/account/receipts/[receiptId]/route.ts
+- [X] T091 [US6] Criar gestão administrativa e Minha Conta acessível em src/app/(admin)/admin/doadores/page.tsx, src/app/(admin)/admin/doadores/[donorId]/page.tsx, src/app/(admin)/admin/doadores/revisoes/page.tsx e src/app/(public)/doar/minha-conta/page.tsx
 
 **Checkpoint**: US6 entrega gestão e autosserviço sem criar autenticação convencional para doador.
 
