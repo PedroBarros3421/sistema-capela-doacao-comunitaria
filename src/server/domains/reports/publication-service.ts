@@ -4,9 +4,16 @@ import { z } from "zod";
 import { db } from "@/server/db/client";
 import { generateAccountabilityReportPdf } from "@/server/documents/accountability-report";
 import { appendAuditEvent } from "@/server/observability/audit";
-import { buildReportSnapshot, reportPeriodSchema } from "@/server/domains/reports/report-service";
+import { buildReportSnapshot } from "@/server/domains/reports/report-service";
 
-const publishSchema = reportPeriodSchema.extend({ generatePdf: z.boolean().default(true) }).strict();
+const publishSchema = z
+  .object({
+    from: z.string().date(),
+    to: z.string().date(),
+    category: z.string().trim().max(80).optional(),
+    generatePdf: z.boolean().default(true),
+  })
+  .strict();
 
 function sanitizeSnapshot(snapshot: Awaited<ReturnType<typeof buildReportSnapshot>>) {
   return {
@@ -42,7 +49,7 @@ type PublishOptions = { client?: PrismaClient; storagePath: string };
 export async function publishReport(actorUserId: string, rawInput: unknown, options: PublishOptions) {
   const client = options.client ?? db;
   const input = publishSchema.parse(rawInput);
-  const snapshot = await buildReportSnapshot(input, client);
+  const snapshot = await buildReportSnapshot({ from: input.from, to: input.to, category: input.category }, client);
   const sanitized = sanitizeSnapshot(snapshot);
 
   return client.$transaction(async (tx) => {
