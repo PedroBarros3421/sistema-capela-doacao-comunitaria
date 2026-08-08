@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
 import { generateOpaqueToken, hashPassword, hashSecret } from "@/server/auth/crypto";
@@ -29,7 +29,7 @@ export async function createInvitationLink(
   userId: string,
   appUrl: string,
   createdById: string | undefined,
-  client: PrismaClient = db,
+  client: PrismaClient | Prisma.TransactionClient = db,
 ) {
   await revokeUserAccessLinksByPurpose(userId, "INVITE", client);
   const token = generateOpaqueToken();

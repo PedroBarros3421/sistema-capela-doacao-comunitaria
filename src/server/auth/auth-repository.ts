@@ -41,6 +41,13 @@ export async function revokeAllUserSessionsExcept(
   });
 }
 
+export async function revokeAllUserSessions(userId: string, client: AuthClient = db) {
+  return client.session.updateMany({
+    where: { userId, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+}
+
 export async function recordLoginAttempt(
   data: {
     userId?: string;
