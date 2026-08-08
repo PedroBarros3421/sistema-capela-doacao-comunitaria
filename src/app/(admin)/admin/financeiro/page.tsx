@@ -35,7 +35,6 @@ export default function FinanceiroPage() {
 
   const fetchLedger = useCallback(
     (f: Filters, p: number) => {
-      setPageState({ status: "loading" });
       const params = new URLSearchParams({ page: String(p), pageSize: "20" });
       if (f.from) params.set("from", f.from);
       if (f.to) params.set("to", f.to);
@@ -61,11 +60,13 @@ export default function FinanceiroPage() {
   }, [fetchLedger, filters, page]);
 
   function handleFilterChange(key: keyof Filters, value: string) {
+    setPageState({ status: "loading" });
     setPage(1);
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
   function handleReset() {
+    setPageState({ status: "loading" });
     setPage(1);
     setFilters(EMPTY_FILTERS);
   }
@@ -90,6 +91,7 @@ export default function FinanceiroPage() {
           <LedgerForm
             onSuccess={() => {
               setShowForm(false);
+              setPageState({ status: "loading" });
               fetchLedger(filters, page);
             }}
           />
@@ -160,7 +162,7 @@ export default function FinanceiroPage() {
             <button
               type="button"
               disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => { setPageState({ status: "loading" }); setPage((p) => p - 1); }}
               aria-label="Página anterior"
             >
               Anterior
@@ -171,7 +173,7 @@ export default function FinanceiroPage() {
             <button
               type="button"
               disabled={page >= pageState.meta.totalPages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => { setPageState({ status: "loading" }); setPage((p) => p + 1); }}
               aria-label="Próxima página"
             >
               Próxima

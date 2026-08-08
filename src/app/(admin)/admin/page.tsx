@@ -22,17 +22,23 @@ export default function AdminDashboardPage() {
   const [state, setState] = useState<PageState>({ status: "loading" });
 
   useEffect(() => {
-    setState({ status: "loading" });
+    let cancelled = false;
     fetch(`/api/admin/dashboard?month=${month}`)
       .then(async (r) => {
+        if (cancelled) return undefined;
         if (!r.ok) {
           const body = await r.json() as { error: { message: string } };
           throw new Error(body.error?.message ?? "Erro ao carregar painel");
         }
         return r.json() as Promise<{ data: DashboardProjection }>;
       })
-      .then(({ data }) => setState({ status: "ready", data }))
-      .catch((err: Error) => setState({ status: "error", message: err.message }));
+      .then((body) => {
+        if (!cancelled && body) setState({ status: "ready", data: body.data });
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setState({ status: "error", message: err.message });
+      });
+    return () => { cancelled = true; };
   }, [month]);
 
   return (
@@ -45,7 +51,10 @@ export default function AdminDashboardPage() {
             id="month-picker"
             type="month"
             value={month}
-            onChange={(e) => setMonth(e.target.value)}
+            onChange={(e) => {
+              setState({ status: "loading" });
+              setMonth(e.target.value);
+            }}
             aria-label="Selecionar mês"
           />
         </div>
