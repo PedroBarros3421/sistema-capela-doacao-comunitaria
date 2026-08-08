@@ -1,4 +1,14 @@
-import type { InventoryUnit, PrismaClient, ProjectStatus, UserRole, UserStatus } from "@prisma/client";
+import type {
+  DonorRelationshipType,
+  DonorReviewStatus,
+  InventoryUnit,
+  PaymentMethod,
+  PrismaClient,
+  ProjectStatus,
+  RecurringSubscriptionStatus,
+  UserRole,
+  UserStatus,
+} from "@prisma/client";
 
 import { hashPassword } from "../../src/server/auth/crypto";
 
@@ -57,6 +67,100 @@ export async function createInventoryItem(
       unit: overrides.unit ?? "UNIT",
       averageUnitValue: overrides.averageUnitValue ?? "5.00",
       acceptedConfig: { create: { accepted: true, priority: false, updatedById: userId } },
+    },
+  });
+}
+
+export async function createDonor(
+  client: PrismaClient,
+  overrides: Partial<{
+    name: string;
+    email: string | null;
+    phone: string | null;
+    document: string | null;
+    relationshipType: DonorRelationshipType;
+    reviewStatus: DonorReviewStatus;
+  }> = {},
+) {
+  sequence += 1;
+  return client.donor.create({
+    data: {
+      name: overrides.name ?? `Doador ${sequence}`,
+      email: overrides.email ?? `doador-${sequence}@example.org`,
+      phone: overrides.phone ?? null,
+      document: overrides.document ?? null,
+      relationshipType: overrides.relationshipType ?? "ONE_OFF",
+      origin: "PUBLIC",
+      reviewStatus: overrides.reviewStatus ?? "CLEAR",
+    },
+  });
+}
+
+export async function createLedgerEntry(
+  client: PrismaClient,
+  createdById: string,
+  overrides: Partial<{
+    donorId: string;
+    amount: string;
+    occurredOn: string;
+    projectId: string;
+    method: PaymentMethod;
+    status: "PENDING" | "CONFIRMED";
+  }> = {},
+) {
+  return client.ledgerEntry.create({
+    data: {
+      type: "INCOME",
+      amount: overrides.amount ?? "100.00",
+      currency: "BRL",
+      occurredOn: new Date(overrides.occurredOn ?? "2026-08-01"),
+      donorId: overrides.donorId,
+      destinationType: overrides.projectId ? "PROJECT" : "MOST_NEEDED",
+      projectId: overrides.projectId,
+      method: overrides.method ?? "PIX",
+      status: overrides.status ?? "CONFIRMED",
+      origin: "ADMIN",
+      createdById,
+      confirmedAt: (overrides.status ?? "CONFIRMED") === "CONFIRMED" ? new Date() : null,
+    },
+  });
+}
+
+export async function createRecurringSubscription(
+  client: PrismaClient,
+  donorId: string,
+  overrides: Partial<{
+    amount: string;
+    status: RecurringSubscriptionStatus;
+    method: PaymentMethod;
+    projectId: string;
+  }> = {},
+) {
+  const simulation = await client.paymentSimulation.create({
+    data: {
+      idempotencyKey: crypto.randomUUID(),
+      donationType: "MONTHLY",
+      amount: overrides.amount ?? "50.00",
+      currency: "BRL",
+      method: overrides.method ?? "PIX",
+      status: "CONFIRMED",
+      destinationType: overrides.projectId ? "PROJECT" : "MOST_NEEDED",
+      projectId: overrides.projectId,
+      donorId,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    },
+  });
+  return client.recurringSubscription.create({
+    data: {
+      donorId,
+      amount: overrides.amount ?? "50.00",
+      currency: "BRL",
+      status: overrides.status ?? "ACTIVE",
+      method: overrides.method ?? "PIX",
+      nextChargeDate: new Date("2026-09-01"),
+      destinationType: overrides.projectId ? "PROJECT" : "MOST_NEEDED",
+      projectId: overrides.projectId,
+      paymentSimulationId: simulation.id,
     },
   });
 }

@@ -17,27 +17,25 @@ export async function matchDonor(
   if (identity.cpfCnpj) {
     const donor = await client.donor.findFirst({ where: { document: identity.cpfCnpj } });
     if (donor) return { donor, reviewPending: false };
-  } else if (identity.email) {
-    const donors = await client.donor.findMany({ where: { email: identity.email }, take: 2 });
-    if (donors.length === 1) return { donor: donors[0], reviewPending: false };
-  } else if (identity.phone) {
-    const donors = await client.donor.findMany({ where: { phone: identity.phone }, take: 2 });
-    if (donors.length === 1) return { donor: donors[0], reviewPending: false };
   }
 
-  const secondaryCandidates = identity.cpfCnpj
-    ? []
-    : await client.donor.findMany({
-        where: {
-          OR: [
-            ...(identity.email ? [{ email: identity.email }] : []),
-            ...(identity.phone ? [{ phone: identity.phone }] : []),
-          ],
-        },
-        select: { id: true },
-        take: 2,
-      });
-  const reviewPending = new Set(secondaryCandidates.map(({ id }) => id)).size > 1;
+  const candidateIds = new Set<string>();
+  if (!identity.cpfCnpj) {
+    if (identity.email) {
+      const donor = await client.donor.findFirst({ where: { email: identity.email } });
+      if (donor) candidateIds.add(donor.id);
+    }
+    if (identity.phone) {
+      const donor = await client.donor.findFirst({ where: { phone: identity.phone } });
+      if (donor) candidateIds.add(donor.id);
+    }
+    if (candidateIds.size === 1) {
+      const donor = await client.donor.findUniqueOrThrow({ where: { id: [...candidateIds][0] } });
+      return { donor, reviewPending: false };
+    }
+  }
+  const secondaryCandidates = [...candidateIds].map((id) => ({ id }));
+  const reviewPending = candidateIds.size > 1;
 
   const donor = await client.donor.create({
     data: {
