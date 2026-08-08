@@ -157,8 +157,8 @@ mais próximo, concorrência não negativa saldo e descarte/termo ficam auditado
 ### Tests for User Story 4
 
 - [ ] T056 [P] [US4] Validar contratos de catálogo, lotes, sugestão, movimentação e termo em tests/contract/admin-inventory.contract.test.ts
-- [ ] T057 [P] [US4] Testar ordenação por validade, múltiplos lotes e bloqueio concorrente em tests/integration/inventory-concurrency.test.ts
-- [ ] T058 [P] [US4] Testar descarte parcial/total, estados e reconciliação de perdas em tests/integration/inventory-discard.test.ts
+- [X] T057 [P] [US4] Testar ordenação por validade, múltiplos lotes e bloqueio concorrente em tests/integration/inventory-concurrency.test.ts
+- [X] T058 [P] [US4] Testar descarte parcial/total, estados e reconciliação de perdas em tests/integration/inventory-discard.test.ts
 - [ ] T059 [P] [US4] Testar cálculo/manual de valor e geração idempotente do termo PDF em tests/integration/in-kind-term.test.ts
 - [ ] T060 [P] [US4] Testar cadastro, alertas 7/30 dias, drill-down, sugestão ajustável e saída em tests/e2e/admin-inventory.spec.ts
 
@@ -168,8 +168,8 @@ mais próximo, concorrência não negativa saldo e descarte/termo ficam auditado
 - [X] T062 [US4] Criar checks de quantidade, linhas únicas e índices de validade/estado em prisma/migrations/003_inventory/migration.sql
 - [X] T063 [P] [US4] Implementar catálogo, consolidação e repositório de lotes em src/server/domains/inventory/inventory-repository.ts
 - [X] T064 [P] [US4] Implementar valoração manual ou média com snapshots em src/server/domains/inventory/valuation-service.ts
-- [ ] T065 [US4] Implementar sugestão e distribuição transacional com `FOR UPDATE` em src/server/domains/inventory/distribution-service.ts
-- [ ] T066 [US4] Implementar descarte parcial/total e derivação de estado do lote em src/server/domains/inventory/discard-service.ts
+- [X] T065 [US4] Implementar sugestão e distribuição transacional com `FOR UPDATE` em src/server/domains/inventory/distribution-service.ts
+- [X] T066 [US4] Implementar descarte parcial/total e derivação de estado do lote em src/server/domains/inventory/discard-service.ts
 - [ ] T067 [US4] Implementar termo PDF privado e idempotente em src/server/documents/in-kind-term.ts
 - [ ] T068 [US4] Implementar endpoints de itens, lotes, sugestão, movimentos e termo em src/app/api/admin/inventory/items/route.ts, src/app/api/admin/inventory/lots/route.ts, src/app/api/admin/inventory/distribution-suggestion/route.ts, src/app/api/admin/inventory/movements/route.ts e src/app/api/admin/inventory/lots/[lotId]/term/route.ts
 - [ ] T069 [US4] Criar telas de estoque consolidado, lotes, alertas, recebimento e distribuição em src/app/(admin)/admin/estoque/page.tsx, src/components/admin/InventoryTable.tsx, src/components/admin/LotForm.tsx e src/components/admin/MovementForm.tsx
