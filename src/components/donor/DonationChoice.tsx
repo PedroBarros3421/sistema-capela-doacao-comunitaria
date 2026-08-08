@@ -13,7 +13,7 @@ export function DonationChoice() {
         <span className="donation-card__icon" aria-hidden="true">♥</span>
         <h2>Doar itens</h2>
         <p>Fale com um voluntário para saber o que a comunidade precisa e combinar a entrega.</p>
-        <a className="donation-link" href="#ajuda">Pedir orientação</a>
+        <Link className="donation-link" href="/doar/itens">Ver itens aceitos</Link>
       </article>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { InventoryTable, type ConsolidatedInventory } from "@/components/admin/InventoryTable";
 import { LotForm } from "@/components/admin/LotForm";
 import { MovementForm } from "@/components/admin/MovementForm";
@@ -31,7 +32,7 @@ export default function EstoquePage() {
   useEffect(() => { void load(); }, [load]);
 
   return <div className="admin-inventory-page">
-    <header className="page-header"><div><p className="page-header__eyebrow">Estoque</p><h1>Itens e lotes</h1><p className="page-header__description">Acompanhe saldos, validades, recebimentos e saídas rastreáveis.</p></div><div className="inventory-actions"><button type="button" onClick={() => setPanel(panel === "lot" ? null : "lot")}>Receber lote</button><button type="button" onClick={() => setPanel(panel === "movement" ? null : "movement")}>Registrar saída</button></div></header>
+    <header className="page-header"><div><p className="page-header__eyebrow">Estoque</p><h1>Itens e lotes</h1><p className="page-header__description">Acompanhe saldos, validades, recebimentos e saídas rastreáveis.</p></div><div className="inventory-actions"><button type="button" onClick={() => setPanel(panel === "lot" ? null : "lot")}>Receber lote</button><button type="button" onClick={() => setPanel(panel === "movement" ? null : "movement")}>Registrar saída</button><Link href="/admin/estoque/itens-aceitos">Itens aceitos</Link></div></header>
     {panel === "lot" && <section className="inventory-panel"><LotForm items={items} onSuccess={() => { setLoading(true); void load(); }} /></section>}
     {panel === "movement" && <section className="inventory-panel"><MovementForm items={items} onSuccess={() => { setLoading(true); void load(); }} /></section>}
     <section aria-labelledby="inventory-filter-heading"><h2 id="inventory-filter-heading" className="sr-only">Alertas de validade</h2><div className="inventory-filters" role="group" aria-label="Filtrar alertas de validade"><button type="button" aria-pressed={windowDays === ""} onClick={() => { setLoading(true); setWindowDays(""); }}>Todo o estoque</button><button type="button" aria-pressed={windowDays === "7"} onClick={() => { setLoading(true); setWindowDays("7"); }}>Vence em 7 dias</button><button type="button" aria-pressed={windowDays === "30"} onClick={() => { setLoading(true); setWindowDays("30"); }}>Vence em 30 dias</button></div></section>
