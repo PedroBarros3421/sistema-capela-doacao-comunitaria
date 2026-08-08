@@ -125,7 +125,8 @@ com vencimento mais próximo.
    **Then** o sistema sugere primeiro o lote com vencimento mais próximo e permite ajuste
    autorizado antes da confirmação.
 3. **Given** uma saída maior que a quantidade de um lote, **When** há quantidade suficiente em
-   outros lotes, **Then** a distribuição é dividida proporcionalmente e cada baixa é registrada.
+   outros lotes, **Then** a distribuição consome os lotes necessários na ordem de vencimento e
+   entrada, e cada baixa é registrada.
 4. **Given** um lote a 7 ou 30 dias do vencimento, **When** o estoque é consultado, **Then** o
    risco é destacado por cor e também por texto ou outro indicador não cromático.
 5. **Given** um bem de maior valor, **When** o voluntário solicita o termo, **Then** recebe um
@@ -330,9 +331,12 @@ o convite, consulta o histórico de acesso e cria ou desativa um projeto.
 - **FR-027**: Lotes a vencer em até 7 dias e entre 8 e 30 dias DEVEM ter níveis distintos de alerta
   perceptíveis sem depender exclusivamente de cor.
 - **FR-028**: Ao distribuir itens, o sistema DEVE sugerir os lotes elegíveis com vencimento mais
-  próximo, dividir a baixa entre lotes quando necessário e permitir ajuste manual autorizado.
+  próximo, dividir a baixa entre lotes quando necessário e permitir ajuste manual autorizado. Um
+  ajuste que divergir da sugestão DEVE exigir motivo e registrar, na auditoria, a alocação sugerida
+  e a alocação confirmada.
 - **FR-029**: Cada distribuição DEVE registrar quantidades por lote, data, projeto, observação e
-  usuário responsável, sem permitir saldo negativo ou consumo de lote inelegível sem justificativa.
+  usuário responsável, sem permitir saldo negativo. Lote inelegível somente pode ser consumido
+  quando uma regra de exceção explicitamente autorizada exigir justificativa textual e auditoria.
 - **FR-030**: Usuários de estoque autorizados DEVEM poder definir cada item como aceito ou pausado e
   prioritário ou comum; a lista pública deve refletir a configuração vigente.
 - **FR-031**: A doação pública de itens DEVE ser apenas informativa, apresentar itens aceitos e
@@ -348,7 +352,8 @@ o convite, consulta o histórico de acesso e cria ou desativa um projeto.
 - **FR-035**: Quando CPF ou CNPJ válido for informado em contribuição financeira, o sistema DEVE
   permitir gerar recibo contendo os dados da contribuição e vínculo ao registro original.
 - **FR-036**: Recibos e termos DEVEM estar disponíveis em documento visualizável e exportável, e sua
-  geração ou nova tentativa não pode alterar o registro de origem.
+  geração ou nova tentativa não pode alterar o registro de origem. Downloads administrativos DEVEM
+  revalidar sessão e papel no servidor; downloads do doador DEVEM validar a posse pelo link pessoal.
 - **FR-037**: A rota `/doar` DEVE usar texto de corpo de ao menos 18 px, alto contraste, controles
   grandes com rótulos textuais, foco visível, navegação por teclado e uma ação principal por tela.
 - **FR-038**: Toda tela de `/doar` DEVE manter “Chamar um voluntário” visível e oferecer leitura em
@@ -424,8 +429,9 @@ o convite, consulta o histórico de acesso e cria ou desativa um projeto.
   indicadores autorizados em até 5 segundos após a confirmação.
 - **SC-006**: Em todos os cenários de teste com lotes elegíveis, a sugestão de distribuição começa
   pelo vencimento mais próximo e nenhuma operação produz quantidade negativa.
-- **SC-007**: Totais dos relatórios reconciliam 99% com os lançamentos financeiros e valores de
-  lotes incluídos no mesmo período e projeto.
+- **SC-007**: Totais dos relatórios reconciliam 100% com os lançamentos financeiros e valores de
+  lotes incluídos no mesmo período e projeto, admitindo somente arredondamento decimal
+  explicitamente definido e reproduzível.
 - **SC-008**: Mudanças em itens aceitos aparecem para novos acessos à tela pública em até 5 segundos,
   sem intervenção ou recadastro do doador.
 - **SC-009**: Recibos e termos válidos ficam disponíveis ao usuário autorizado em até 10 segundos
@@ -436,8 +442,13 @@ o convite, consulta o histórico de acesso e cria ou desativa um projeto.
   recursos e o projeto com maior valor na visão pública em até 30 segundos.
 - **SC-012**: Nenhum teste de repetição de confirmação, concorrência de estoque ou nova tentativa de
   documento produz registro financeiro duplicado, saldo negativo ou documento conflitante.
-- **SC-013**: Em 99% dos cenários de descarte, a redução do saldo do lote e o total de perdas no
-  relatório reconciliam com as quantidades registradas nos descartes do período.
+- **SC-013**: Em 100% dos cenários de descarte, a redução do saldo do lote e o total de perdas no
+  relatório reconciliam exatamente com as quantidades registradas nos descartes do período.
+- **SC-014**: Sob a carga-alvo de 100 acessos públicos e 20 administrativos simultâneos, páginas
+  críticas ficam interativas em até 2,5 segundos no percentil 75 e operações administrativas
+  comuns respondem em até 1 segundo no percentil 95.
+- **SC-015**: O health check permite monitoramento sintético da disponibilidade mensal de 99,5%,
+  sem revelar versão, credenciais, caminhos internos ou dados pessoais.
 
 ## Assumptions
 

@@ -27,9 +27,10 @@ Argon2id; `pdf-lib`; Tailwind CSS; npm; Caddy 2; Docker Engine com Docker Compos
 montado somente na aplicação; cópia de segurança criptografada fora da VPS
 
 **Testing**: Vitest para unidade e integração; Testing Library para componentes; Playwright para
-contrato HTTP, ponta a ponta e acessibilidade; axe-core para verificações automatizadas;
-Testcontainers com PostgreSQL 18 efêmero para cada suíte de integração, sem banco compartilhado
-nem `TEST_DATABASE_URL`
+contrato HTTP, ponta a ponta, acessibilidade e tempos de interação; axe-core para verificações
+automatizadas; Testcontainers com PostgreSQL 18 efêmero para cada suíte de integração, sem banco
+compartilhado nem `TEST_DATABASE_URL`; testes de carga registram p75/p95 para páginas, operações e
+documentos sob 100 acessos públicos e 20 administrativos simultâneos
 
 **Target Platform**: Navegadores modernos; servidor Linux VPS x86_64 com Docker, mínimo inicial de
 2 vCPU, 4 GB de RAM e 80 GB SSD
@@ -53,11 +54,11 @@ disponibilidade alvo de 99,5% ao mês, RPO de 6 horas e RTO de 4 horas
 
 ### UI Component Strategy
 
-shadcn/ui será a fonte padrão de componentes reutilizáveis para `/admin` e `/doar`. Antes de criar
-uma primitiva própria, a implementação deve reutilizar ou adaptar um componente adequado do
-catálogo. Componentes específicos do domínio e composições próprias são permitidos quando não
-houver equivalente, preservando os requisitos funcionais de acessibilidade, responsividade e
-identidade visual definidos na especificação.
+As primitivas acessíveis mantidas em `src/components/shared` serão a base padrão de `/admin` e
+`/doar`. Radix UI será usado para comportamentos complexos que exigem gerenciamento robusto de
+foco, teclado ou sobreposição. shadcn/ui poderá servir como referência de composição, mas não será
+uma dependência obrigatória nem justificará duplicar primitivas existentes. Componentes específicos
+do domínio permanecem permitidos, preservando acessibilidade, responsividade e identidade visual.
 
 ## Constitution Check
 

@@ -309,11 +309,11 @@ reenvia link, filtra tentativas e desativa projeto sem quebrar histórico.
 - [ ] T122 Implementar restauração isolada e modo `--verify-only` em deploy/scripts/restore.sh
 - [ ] T123 [P] Implementar limpeza configurável de sessões, links e tentativas antigas em src/server/maintenance/retention.ts e scripts/run-retention.ts
 - [ ] T124 Endurecer rate limits no PostgreSQL, CSP, cookies, uploads/downloads e proteção contra enumeração em src/server/security/rate-limit.ts, src/server/auth/session.ts e next.config.ts
-- [ ] T125 [P] Adicionar índices finais e testes de carga para 100 públicos/20 admins em prisma/migrations/006_performance/migration.sql e tests/performance/baseline.test.ts
+- [ ] T125 [P] Adicionar índices finais e testes de carga para 100 públicos/20 admins, medindo páginas críticas p75 <= 2,5 s, operações comuns p95 <= 1 s e PDFs p95 <= 10 s em prisma/migrations/006_performance/migration.sql e tests/performance/baseline.test.ts
 - [ ] T126 [P] Completar suíte WCAG 2.2 AA em 320/768/desktop, teclado e zoom em tests/accessibility/public-flow.spec.ts e tests/accessibility/admin-flow.spec.ts
-- [ ] T127 [P] Validar conteúdo seguro de logs, auditoria e health check em tests/integration/observability-security.test.ts e src/app/api/health/route.ts
-- [ ] T128 Executar todos os comandos e cenários de specs/001-manage-community-donations/quickstart.md e registrar resultados em specs/001-manage-community-donations/validation-report.md
-- [ ] T129 Documentar retenção aprovada, operação VPS, backup/restore e adaptadores simulados em docs/operations.md e docs/privacy-retention.md
+- [ ] T127 [P] Validar conteúdo seguro de logs, auditoria e health check apto a monitoramento sintético sem dados internos em tests/integration/observability-security.test.ts e src/app/api/health/route.ts
+- [ ] T128 Executar todos os comandos e cenários de specs/001-manage-community-donations/quickstart.md, validar migrações do zero e em cópia com dados, exercitar rollback ou forward-fix documentado e registrar resultados em specs/001-manage-community-donations/validation-report.md
+- [ ] T129 Documentar retenção aprovada, operação VPS, monitoramento mensal do SLO de 99,5%, backup/restore, estratégia de rollback/forward-fix de migrações e adaptadores simulados em docs/operations.md e docs/privacy-retention.md
 
 **Checkpoint**: Release candidata passa todos os gates e pode ser implantada na VPS.
 
@@ -419,8 +419,23 @@ US8: T104 + T105 + T106 + T107; depois T110 + T111 + T115
 
 **Purpose**: Corrigir regressões observadas no fluxo público concluído e tornar sua validação independente do banco compartilhado e de APIs mockadas.
 
-- [X] T130 CRITICAL Criar teste de regressão que exercite configuração pública, projeto ativo, criação e confirmação simulada pelas rotas reais com PostgreSQL isolado per Constitution V, FR-014, FR-016 e US1/AC1 (contradicts)
-- [X] T131 CRITICAL Corrigir o bootstrap de configuração e banco no desenvolvimento para que `/api/public/configuration` e a confirmação retornem envelopes HTTP úteis e funcionem com o ambiente local documentado per FR-014, FR-016 e US1/AC1 (partial)
-- [X] T132 [P] Migrar o helper e os testes de integração para PostgreSQL 18 efêmero com Testcontainers, sem exigir `TEST_DATABASE_URL` ou banco compartilhado, e atualizar plan.md, research.md e quickstart.md per plan: Testing (partial)
-- [X] T133 [P] Implementar carregamento, vazio, erro recuperável e nova tentativa da lista de projetos no fluxo de dinheiro per Constitution V e FR-014 (partial)
-- [X] T134 Executar as regressões sem mocks de API, os testes de integração com Testcontainers, typecheck e lint, registrando que projetos e confirmação simulada funcionam per SC-005 e Constitution V (partial)
+- [X] T130 CRITICAL Criar teste de regressão que exercite configuração pública, projeto ativo, criação e confirmação simulada pelas rotas reais com PostgreSQL isolado per Constitution V, FR-014, FR-016 e US1/AC1
+- [X] T131 CRITICAL Corrigir o bootstrap de configuração e banco no desenvolvimento para que `/api/public/configuration` e a confirmação retornem envelopes HTTP úteis e funcionem com o ambiente local documentado per FR-014, FR-016 e US1/AC1
+- [X] T132 [P] Migrar o helper e os testes de integração para PostgreSQL 18 efêmero com Testcontainers, sem exigir `TEST_DATABASE_URL` ou banco compartilhado, e atualizar plan.md, research.md e quickstart.md per plan: Testing
+- [X] T133 [P] Implementar carregamento, vazio, erro recuperável e nova tentativa da lista de projetos no fluxo de dinheiro per Constitution V e FR-014
+- [X] T134 Executar as regressões sem mocks de API, os testes de integração com Testcontainers, typecheck e lint, registrando que projetos e confirmação simulada funcionam per SC-005 e Constitution V
+
+---
+
+## Phase 13: Analysis Remediation
+
+**Purpose**: Fechar lacunas constitucionais e contratuais identificadas após a Fase 6 sem alterar o escopo das histórias futuras.
+
+- [ ] T135 [P] [US4] Testar que ajuste manual da sugestão exige permissão e motivo, preserva alocações sugerida/confirmada e gera auditoria em tests/integration/inventory-manual-adjustment.test.ts
+- [ ] T136 [US4] Implementar motivo obrigatório e snapshot auditável da sugestão quando a distribuição confirmada divergir em src/server/domains/inventory/distribution-service.ts e src/app/api/admin/inventory/movements/route.ts
+- [ ] T137 [P] [US1] Validar autorização, privacidade, repetição e conteúdo do download administrativo de recibos em tests/contract/admin-receipts.contract.test.ts e tests/integration/admin-receipt-download.test.ts
+- [ ] T138 [US1] Implementar download administrativo privado de recibos com revalidação de sessão e papel em src/app/api/admin/documents/receipts/[fileName]/route.ts
+- [ ] T139 [P] [US4] Validar autorização, privacidade, repetição e conteúdo do download administrativo de termos em tests/contract/admin-terms.contract.test.ts e tests/integration/admin-term-download.test.ts
+- [ ] T140 [US4] Implementar download administrativo privado de termos com revalidação de sessão e papel em src/app/api/admin/documents/terms/[fileName]/route.ts
+
+**Checkpoint**: Ajustes manuais são autorizados e auditáveis; documentos privados possuem entrega administrativa testada; critérios de reconciliação e desempenho são verificáveis.
