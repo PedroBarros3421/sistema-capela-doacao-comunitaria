@@ -837,6 +837,30 @@ a {
 
 .public-report-chart { color: #1f7a4d; margin-block: var(--space-4); }
 
+.user-form, .project-form {
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid #dce4eb;
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.user-form fieldset { display: grid; gap: var(--space-3); border: 0; padding: 0; }
+.user-form label, .project-form label { display: grid; gap: var(--space-1); font-weight: 700; }
+.user-form input, .user-form select, .project-form input {
+  border: 1px solid #cbd5df;
+  border-radius: var(--radius-small);
+  background: #fff;
+  padding: var(--space-2) var(--space-3);
+}
+.project-form { display: flex; align-items: end; gap: var(--space-3); }
+
+.user-actions { display: grid; gap: var(--space-1); }
+.user-actions button { justify-self: start; }
+.user-actions__message { font-size: 0.78rem; color: #405a6c; }
+
 .type-badge,
 .origin-badge {
   display: inline-flex;
