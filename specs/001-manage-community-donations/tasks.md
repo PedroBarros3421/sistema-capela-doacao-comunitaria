@@ -166,8 +166,8 @@ mais próximo, concorrência não negativa saldo e descarte/termo ficam auditado
 
 - [X] T061 [US4] Adicionar InventoryItem, AcceptedItemConfig, InventoryLot, InventoryMovement, InventoryMovementLine e InKindDonationTerm em prisma/schema.prisma
 - [X] T062 [US4] Criar checks de quantidade, linhas únicas e índices de validade/estado em prisma/migrations/003_inventory/migration.sql
-- [ ] T063 [P] [US4] Implementar catálogo, consolidação e repositório de lotes em src/server/domains/inventory/inventory-repository.ts
-- [ ] T064 [P] [US4] Implementar valoração manual ou média com snapshots em src/server/domains/inventory/valuation-service.ts
+- [X] T063 [P] [US4] Implementar catálogo, consolidação e repositório de lotes em src/server/domains/inventory/inventory-repository.ts
+- [X] T064 [P] [US4] Implementar valoração manual ou média com snapshots em src/server/domains/inventory/valuation-service.ts
 - [ ] T065 [US4] Implementar sugestão e distribuição transacional com `FOR UPDATE` em src/server/domains/inventory/distribution-service.ts
 - [ ] T066 [US4] Implementar descarte parcial/total e derivação de estado do lote em src/server/domains/inventory/discard-service.ts
 - [ ] T067 [US4] Implementar termo PDF privado e idempotente em src/server/documents/in-kind-term.ts
