@@ -156,7 +156,7 @@ mais próximo, concorrência não negativa saldo e descarte/termo ficam auditado
 
 ### Tests for User Story 4
 
-- [ ] T056 [P] [US4] Validar contratos de catálogo, lotes, sugestão, movimentação e termo em tests/contract/admin-inventory.contract.test.ts
+- [X] T056 [P] [US4] Validar contratos de catálogo, lotes, sugestão, movimentação e termo em tests/contract/admin-inventory.contract.test.ts
 - [X] T057 [P] [US4] Testar ordenação por validade, múltiplos lotes e bloqueio concorrente em tests/integration/inventory-concurrency.test.ts
 - [X] T058 [P] [US4] Testar descarte parcial/total, estados e reconciliação de perdas em tests/integration/inventory-discard.test.ts
 - [X] T059 [P] [US4] Testar cálculo/manual de valor e geração idempotente do termo PDF em tests/integration/in-kind-term.test.ts
@@ -171,7 +171,7 @@ mais próximo, concorrência não negativa saldo e descarte/termo ficam auditado
 - [X] T065 [US4] Implementar sugestão e distribuição transacional com `FOR UPDATE` em src/server/domains/inventory/distribution-service.ts
 - [X] T066 [US4] Implementar descarte parcial/total e derivação de estado do lote em src/server/domains/inventory/discard-service.ts
 - [X] T067 [US4] Implementar termo PDF privado e idempotente em src/server/documents/in-kind-term.ts
-- [ ] T068 [US4] Implementar endpoints de itens, lotes, sugestão, movimentos e termo em src/app/api/admin/inventory/items/route.ts, src/app/api/admin/inventory/lots/route.ts, src/app/api/admin/inventory/distribution-suggestion/route.ts, src/app/api/admin/inventory/movements/route.ts e src/app/api/admin/inventory/lots/[lotId]/term/route.ts
+- [X] T068 [US4] Implementar endpoints de itens, lotes, sugestão, movimentos e termo em src/app/api/admin/inventory/items/route.ts, src/app/api/admin/inventory/lots/route.ts, src/app/api/admin/inventory/distribution-suggestion/route.ts, src/app/api/admin/inventory/movements/route.ts e src/app/api/admin/inventory/lots/[lotId]/term/route.ts
 - [ ] T069 [US4] Criar telas de estoque consolidado, lotes, alertas, recebimento e distribuição em src/app/(admin)/admin/estoque/page.tsx, src/components/admin/InventoryTable.tsx, src/components/admin/LotForm.tsx e src/components/admin/MovementForm.tsx
 
 **Checkpoint**: US4 opera estoque completo sem depender das histórias P2.
