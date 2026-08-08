@@ -12,17 +12,21 @@ export async function createUser(
     role: UserRole;
     status: UserStatus;
     password: string;
+    blockedAt: Date;
   }> = {},
 ) {
   sequence += 1;
+  const status = overrides.status ?? "ACTIVE";
   const password = overrides.password ?? "secure-test-password-1";
   return client.user.create({
     data: {
       name: overrides.name ?? `Usuário ${sequence}`,
       email: overrides.email ?? `user-${sequence}@example.org`,
       role: overrides.role ?? "GENERAL_ADMIN",
-      status: overrides.status ?? "ACTIVE",
+      status,
       passwordHash: await hashPassword(password),
+      // DB enforces: status = 'BLOCKED' ↔ blocked_at IS NOT NULL
+      blockedAt: overrides.blockedAt ?? (status === "BLOCKED" ? new Date() : undefined),
     },
   });
 }
