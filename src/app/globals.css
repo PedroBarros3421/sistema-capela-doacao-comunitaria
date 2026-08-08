@@ -837,29 +837,41 @@ a {
 
 .public-report-chart { color: #1f7a4d; margin-block: var(--space-4); }
 
-.user-form, .project-form {
-  display: grid;
+.user-form { display: grid; gap: var(--space-4); }
+.user-form fieldset { display: grid; grid-template-columns: repeat(2, minmax(12rem, 1fr)); gap: var(--space-4); border: 0; padding: 0; }
+.user-form legend { grid-column: 1 / -1; margin-bottom: var(--space-2); color: #173d57; font-size: 1.1rem; font-weight: 800; }
+.user-form label { display: grid; gap: var(--space-1); font-weight: 700; }
+.user-form input, .user-form select { width: 100%; border: 1px solid #cbd5df; border-radius: var(--radius-small); background: #fff; padding: var(--space-2) var(--space-3); }
+.user-form .shared-alert { grid-column: 1 / -1; }
+
+.project-form {
+  display: flex;
+  align-items: end;
   gap: var(--space-3);
+  margin-bottom: var(--space-4);
   border: 1px solid #dce4eb;
   border-radius: var(--radius-medium);
   background: var(--color-surface);
   padding: var(--space-4);
-  margin-bottom: var(--space-4);
+  box-shadow: 0 0.35rem 1.2rem rgb(21 48 70 / 5%);
 }
+.project-form label { display: grid; gap: var(--space-1); color: #334f62; font-size: 0.78rem; font-weight: 800; }
+.project-form input { border: 1px solid #cbd5df; border-radius: var(--radius-small); background: #fff; padding: var(--space-2) var(--space-3); }
 
-.user-form fieldset { display: grid; gap: var(--space-3); border: 0; padding: 0; }
-.user-form label, .project-form label { display: grid; gap: var(--space-1); font-weight: 700; }
-.user-form input, .user-form select, .project-form input {
-  border: 1px solid #cbd5df;
+.row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.row-actions button {
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-small);
-  background: #fff;
-  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  font-weight: 750;
+  font-size: 0.8rem;
 }
-.project-form { display: flex; align-items: end; gap: var(--space-3); }
-
-.user-actions { display: grid; gap: var(--space-1); }
-.user-actions button { justify-self: start; }
-.user-actions__message { font-size: 0.78rem; color: #405a6c; }
+.row-actions button:hover { background: #eaf1f5; }
+.row-actions__message { flex-basis: 100%; font-size: 0.78rem; color: #405a6c; }
+td select[aria-label] { border: 1px solid #cbd5df; border-radius: var(--radius-small); background: #fff; padding: var(--space-1) var(--space-2); }
 
 .type-badge,
 .origin-badge {

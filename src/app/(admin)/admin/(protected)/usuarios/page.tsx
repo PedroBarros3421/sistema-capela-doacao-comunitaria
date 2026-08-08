@@ -102,13 +102,13 @@ export default function UsuariosPage() {
       </header>
 
       {showForm && (
-        <section id="user-form-panel" aria-labelledby="form-heading">
+        <section id="user-form-panel" className="ledger-form-panel" aria-labelledby="form-heading">
           <h2 id="form-heading" className="sr-only">Formulário de novo usuário</h2>
           <UserForm onSuccess={() => { setShowForm(false); setLoading(true); load(); }} />
         </section>
       )}
 
-      <form role="search" aria-label="Filtrar usuários" onSubmit={(e) => e.preventDefault()}>
+      <form className="ledger-filters" role="search" aria-label="Filtrar usuários" onSubmit={(e) => e.preventDefault()}>
         <label>Status
           <select value={statusFilter} onChange={(e) => { setLoading(true); setStatusFilter(e.target.value); }}>
             <option value="">Todos</option>
@@ -142,7 +142,7 @@ export default function UsuariosPage() {
                     </select>
                   </td>
                   <td>{STATUS_LABELS[user.status]}</td>
-                  <td className="user-actions">
+                  <td className="row-actions">
                     {user.status === "ACTIVE" && (
                       <button type="button" onClick={() => void updateUser(user.id, { status: "INACTIVE" })}>Desativar</button>
                     )}
@@ -155,7 +155,7 @@ export default function UsuariosPage() {
                     {user.status !== "ACTIVE" && (
                       <button type="button" onClick={() => void resendInvitation(user.id)}>Reenviar convite</button>
                     )}
-                    {rowMessage?.userId === user.id && <p className="user-actions__message">{rowMessage.text}</p>}
+                    {rowMessage?.userId === user.id && <p className="row-actions__message">{rowMessage.text}</p>}
                   </td>
                 </tr>
               ))}

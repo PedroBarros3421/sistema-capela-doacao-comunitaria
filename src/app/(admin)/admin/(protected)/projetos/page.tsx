@@ -97,7 +97,7 @@ export default function ProjetosPage() {
                 <tr key={project.id}>
                   <td>{project.name}</td>
                   <td>{project.status === "ACTIVE" ? "Ativo" : "Inativo"}</td>
-                  <td>
+                  <td className="row-actions">
                     <button type="button" onClick={() => void toggleStatus(project)}>
                       {project.status === "ACTIVE" ? "Desativar" : "Reativar"}
                     </button>
