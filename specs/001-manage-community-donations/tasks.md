@@ -253,14 +253,14 @@ muda; nova publicação passa a ser a visão pública.
 
 ### Implementation for User Story 7
 
-- [ ] T096 [US7] Adicionar PublicReportPublication e vínculo de supersessão ao modelo em prisma/schema.prisma
-- [ ] T097 [US7] Criar constraints de período, índice de última publicação e imutabilidade em prisma/migrations/005_report_publications/migration.sql
-- [ ] T098 [US7] Implementar agregação de dinheiro, bens, giro, vencidos e descartes em src/server/domains/reports/report-service.ts
-- [ ] T099 [US7] Implementar snapshot sanitizado e publicação append-only em src/server/domains/reports/publication-service.ts
-- [ ] T100 [P] [US7] Implementar PDF de prestação de contas derivado do snapshot em src/server/documents/accountability-report.ts
-- [ ] T101 [US7] Implementar endpoints administrativos de prévia/publicação em src/app/api/admin/reports/preview/route.ts e src/app/api/admin/reports/publications/route.ts
-- [ ] T102 [US7] Implementar endpoints públicos da última publicação e PDF em src/app/api/public/reports/latest/route.ts e src/app/api/public/reports/latest.pdf/route.ts
-- [ ] T103 [US7] Criar gerador administrativo e visão pública com gráfico textual/SVG acessível em src/app/(admin)/admin/relatorios/page.tsx, src/app/(public)/doar/transparencia/page.tsx e src/components/donor/PublicReportChart.tsx
+- [X] T096 [US7] Adicionar PublicReportPublication e vínculo de supersessão ao modelo em prisma/schema.prisma
+- [X] T097 [US7] Criar constraints de período, índice de última publicação e imutabilidade em prisma/migrations/005_report_publications/migration.sql
+- [X] T098 [US7] Implementar agregação de dinheiro, bens, giro, vencidos e descartes em src/server/domains/reports/report-service.ts
+- [X] T099 [US7] Implementar snapshot sanitizado e publicação append-only em src/server/domains/reports/publication-service.ts
+- [X] T100 [P] [US7] Implementar PDF de prestação de contas derivado do snapshot em src/server/documents/accountability-report.ts
+- [X] T101 [US7] Implementar endpoints administrativos de prévia/publicação em src/app/api/admin/reports/preview/route.ts e src/app/api/admin/reports/publications/route.ts
+- [X] T102 [US7] Implementar endpoints públicos da última publicação e PDF em src/app/api/public/reports/latest/route.ts e src/app/api/public/reports/latest.pdf/route.ts
+- [X] T103 [US7] Criar gerador administrativo e visão pública com gráfico textual/SVG acessível em src/app/(admin)/admin/relatorios/page.tsx, src/app/(public)/doar/transparencia/page.tsx e src/components/donor/PublicReportChart.tsx
 
 **Checkpoint**: US7 fornece transparência aprovada e historicamente auditável.
 
@@ -283,15 +283,15 @@ reenvia link, filtra tentativas e desativa projeto sem quebrar histórico.
 
 ### Implementation for User Story 8
 
-- [ ] T108 [US8] Implementar CRUD, status, papel, desbloqueio e revogação de sessões em src/server/domains/users/user-admin-service.ts
-- [ ] T109 [US8] Implementar reenvio que revoga convites anteriores e retorna o novo link uma vez em src/server/domains/users/invitation-service.ts
-- [ ] T110 [P] [US8] Implementar ciclo ativo/inativo de projetos e proteção de vínculos em src/server/domains/projects/project-admin-service.ts
-- [ ] T111 [P] [US8] Implementar consulta paginada e filtros de tentativas em src/server/domains/users/login-history-service.ts
-- [ ] T112 [US8] Implementar endpoints de coleção/detalhe/desbloqueio/convite de usuários em src/app/api/admin/users/route.ts, src/app/api/admin/users/[userId]/route.ts, src/app/api/admin/users/[userId]/unlock/route.ts e src/app/api/admin/users/[userId]/invitation/route.ts
-- [ ] T113 [US8] Implementar endpoints de projetos em src/app/api/admin/projects/route.ts e src/app/api/admin/projects/[projectId]/route.ts
-- [ ] T114 [US8] Implementar endpoint de histórico de login em src/app/api/admin/login-attempts/route.ts
-- [ ] T115 [P] [US8] Criar listagem, formulário e ações de usuários em src/app/(admin)/admin/usuarios/page.tsx e src/components/admin/UserForm.tsx
-- [ ] T116 [US8] Criar projetos e histórico de login em src/app/(admin)/admin/projetos/page.tsx e src/app/(admin)/admin/acessos/page.tsx
+- [X] T108 [US8] Implementar CRUD, status, papel, desbloqueio e revogação de sessões em src/server/domains/users/user-admin-service.ts
+- [X] T109 [US8] Implementar reenvio que revoga convites anteriores e retorna o novo link uma vez em src/server/domains/users/invitation-service.ts
+- [X] T110 [P] [US8] Implementar ciclo ativo/inativo de projetos e proteção de vínculos em src/server/domains/projects/project-admin-service.ts
+- [X] T111 [P] [US8] Implementar consulta paginada e filtros de tentativas em src/server/domains/users/login-history-service.ts
+- [X] T112 [US8] Implementar endpoints de coleção/detalhe/desbloqueio/convite de usuários em src/app/api/admin/users/route.ts, src/app/api/admin/users/[userId]/route.ts, src/app/api/admin/users/[userId]/unlock/route.ts e src/app/api/admin/users/[userId]/invitation/route.ts
+- [X] T113 [US8] Implementar endpoints de projetos em src/app/api/admin/projects/route.ts e src/app/api/admin/projects/[projectId]/route.ts
+- [X] T114 [US8] Implementar endpoint de histórico de login em src/app/api/admin/login-attempts/route.ts
+- [X] T115 [P] [US8] Criar listagem, formulário e ações de usuários em src/app/(admin)/admin/usuarios/page.tsx e src/components/admin/UserForm.tsx
+- [X] T116 [US8] Criar projetos e histórico de login em src/app/(admin)/admin/projetos/page.tsx e src/app/(admin)/admin/acessos/page.tsx
 
 **Checkpoint**: As oito histórias estão funcionais e administráveis pela própria aplicação.
 
@@ -432,10 +432,10 @@ US8: T104 + T105 + T106 + T107; depois T110 + T111 + T115
 **Purpose**: Fechar lacunas constitucionais e contratuais identificadas após a Fase 6 sem alterar o escopo das histórias futuras.
 
 - [ ] T135 [P] [US4] Testar que ajuste manual da sugestão exige permissão e motivo, preserva alocações sugerida/confirmada e gera auditoria em tests/integration/inventory-manual-adjustment.test.ts
-- [ ] T136 [US4] Implementar motivo obrigatório e snapshot auditável da sugestão quando a distribuição confirmada divergir em src/server/domains/inventory/distribution-service.ts e src/app/api/admin/inventory/movements/route.ts
+- [X] T136 [US4] Implementar motivo obrigatório e snapshot auditável da sugestão quando a distribuição confirmada divergir em src/server/domains/inventory/distribution-service.ts e src/app/api/admin/inventory/movements/route.ts
 - [ ] T137 [P] [US1] Validar autorização, privacidade, repetição e conteúdo do download administrativo de recibos em tests/contract/admin-receipts.contract.test.ts e tests/integration/admin-receipt-download.test.ts
-- [ ] T138 [US1] Implementar download administrativo privado de recibos com revalidação de sessão e papel em src/app/api/admin/documents/receipts/[fileName]/route.ts
+- [X] T138 [US1] Implementar download administrativo privado de recibos com revalidação de sessão e papel em src/app/api/admin/documents/receipts/[fileName]/route.ts
 - [ ] T139 [P] [US4] Validar autorização, privacidade, repetição e conteúdo do download administrativo de termos em tests/contract/admin-terms.contract.test.ts e tests/integration/admin-term-download.test.ts
-- [ ] T140 [US4] Implementar download administrativo privado de termos com revalidação de sessão e papel em src/app/api/admin/documents/terms/[fileName]/route.ts
+- [X] T140 [US4] Implementar download administrativo privado de termos com revalidação de sessão e papel em src/app/api/admin/documents/terms/[fileName]/route.ts
 
 **Checkpoint**: Ajustes manuais são autorizados e auditáveis; documentos privados possuem entrega administrativa testada; critérios de reconciliação e desempenho são verificáveis.
