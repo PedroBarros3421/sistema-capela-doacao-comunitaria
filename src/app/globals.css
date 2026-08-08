@@ -167,6 +167,51 @@ a {
 .next-steps { margin-block: var(--space-6); text-align: left; }
 .next-steps li { margin-block: var(--space-3); }
 
+.accepted-items-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-4);
+  margin-block: var(--space-8);
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.accepted-item {
+  display: grid;
+  gap: var(--space-2);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  padding: var(--space-5);
+  box-shadow: 0 0.5rem 1.5rem rgb(23 33 15 / 8%);
+}
+.accepted-item strong { color: var(--color-primary); font-size: 1.15rem; }
+.accepted-item span { color: var(--color-text-muted); }
+.accepted-item--priority {
+  border-color: var(--color-primary);
+  background: #eef8ea;
+  box-shadow: 0 0 0 0.1rem var(--color-primary);
+}
+.accepted-item__badge {
+  justify-self: start;
+  border-radius: 999px;
+  background: var(--color-primary);
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-on-primary);
+  font-size: var(--font-size-small);
+  font-weight: 800;
+}
+.donor-delivery-info {
+  margin-block: var(--space-6);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  padding: var(--space-6);
+  box-shadow: 0 0.5rem 1.5rem rgb(23 33 15 / 8%);
+  text-align: left;
+}
+.donor-delivery-info h2 { margin-top: 0; color: var(--color-primary); font-size: 1.4rem; font-weight: 900; }
+
 @media (max-width: 38rem) {
   .donor-page { width: min(calc(100% - 1rem), 54rem); padding-top: var(--space-4); }
   .donation-card, .donor-step, .next-steps { padding: var(--space-4); }
