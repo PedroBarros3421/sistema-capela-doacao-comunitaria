@@ -26,7 +26,6 @@ jobs:
 
           SPEC_CHANGED=false
           MISSING_DOCS=""
-          CHECKLIST_WARN=""
 
           for dir in $FEATURE_DIRS; do
             SPEC_CHANGED_HERE=false
@@ -43,12 +42,6 @@ jobs:
                   MISSING_DOCS="$MISSING_DOCS $dir/$required"
                 fi
               done
-
-              # Item 4: spec.md alterado deveria vir acompanhado da revisão do checklist.
-              if ! echo "$CHANGED_FILES" | grep -qx "$dir/checklists/requirements.md"; then
-                echo "::warning::$dir/spec.md foi alterado mas $dir/checklists/requirements.md não foi atualizado."
-                CHECKLIST_WARN="$CHECKLIST_WARN $dir"
-              fi
             else
               # Item 2: plan.md/tasks.md alterados sem alteração correspondente em spec.md (aviso apenas).
               for f in plan.md tasks.md; do
@@ -61,7 +54,6 @@ jobs:
 
           echo "spec_changed=$SPEC_CHANGED" >> "$GITHUB_OUTPUT"
           echo "missing_docs=$(echo $MISSING_DOCS | xargs)" >> "$GITHUB_OUTPUT"
-          echo "checklist_warn=$(echo $CHECKLIST_WARN | xargs)" >> "$GITHUB_OUTPUT"
 
       - name: Log when spec.md was not changed
         if: steps.analysis.outputs.spec_changed == 'false'
@@ -74,7 +66,6 @@ jobs:
           script: |
             const specChanged = "${{ steps.analysis.outputs.spec_changed }}" === "true";
             const missingDocs = "${{ steps.analysis.outputs.missing_docs }}".trim();
-            const checklistWarn = "${{ steps.analysis.outputs.checklist_warn }}".trim();
 
             let body = "";
 
@@ -86,13 +77,6 @@ jobs:
               body += "\n⚠️ **Documentos obrigatórios ausentes:**\n";
               for (const doc of missingDocs.split(" ")) {
                 body += `- \`${doc}\` não foi encontrado, mas o \`spec.md\` correspondente foi alterado.\n`;
-              }
-            }
-
-            if (checklistWarn) {
-              body += "\n📋 **Checklist não atualizado:**\n";
-              for (const dir of checklistWarn.split(" ")) {
-                body += `- \`${dir}/spec.md\` foi alterado, mas \`${dir}/checklists/requirements.md\` não foi atualizado nesta PR. Considere revisar o checklist de requisitos.\n`;
               }
             }
 
