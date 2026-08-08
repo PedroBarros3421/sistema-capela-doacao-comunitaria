@@ -22,7 +22,7 @@ describe("public donation routes with real PostgreSQL", () => {
       CHAPEL_CONTACT_EMAIL: "contato@example.org",
       CHAPEL_CONTACT_PHONE: "5585999999999",
       SEED_ADMIN_EMAIL: "admin@example.org",
-      SEED_ADMIN_PASSWORD: "test-only-admin-password",
+      SEED_ADMIN_PASSWORD: "test-only-admin-password-1",
     });
     resetServerEnvForTests();
   });
