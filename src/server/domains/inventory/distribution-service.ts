@@ -12,9 +12,16 @@ const distributionSchema = z.object({
   type: z.literal("DISTRIBUTION").optional(),
   occurredOn: z.string().date(),
   projectId: z.string().uuid(),
+  reason: z.string().trim().min(1).max(1000).optional(),
   note: z.string().trim().max(1000).optional(),
   lines: z.array(z.object({ lotId: z.string().uuid(), quantity: quantitySchema }).strict()).min(1),
 }).strict();
+
+function sortedAllocation(lines: Array<{ lotId: string; quantity: string }>) {
+  return lines
+    .map((line) => ({ lotId: line.lotId, quantity: new Decimal(line.quantity).toFixed(3) }))
+    .sort((a, b) => a.lotId.localeCompare(b.lotId));
+}
 
 type LockedLot = {
   id: string;
@@ -32,7 +39,7 @@ function ensureUniqueLots(lines: Array<{ lotId: string }>) {
   }
 }
 
-export async function suggestDistribution(rawInput: unknown, client: PrismaClient = db) {
+export async function suggestDistribution(rawInput: unknown, client: PrismaClient | Prisma.TransactionClient = db) {
   const input = suggestionSchema.parse(rawInput);
   const lots = await client.inventoryLot.findMany({
     where: {
@@ -85,8 +92,35 @@ export async function distributeInventory(actorUserId: string, rawInput: unknown
       }
     }
 
+    const requestedByItem = new Map<string, Decimal>();
+    for (const line of input.lines) {
+      const lot = byId.get(line.lotId)!;
+      requestedByItem.set(lot.item_id, (requestedByItem.get(lot.item_id) ?? new Decimal(0)).add(line.quantity));
+    }
+
+    let diverges = false;
+    const suggestionSnapshot: Record<string, Array<{ lotId: string; quantity: string }>> = {};
+    for (const [itemId, quantity] of requestedByItem) {
+      const suggested = await suggestDistribution({ itemId, quantity: quantity.toFixed(3) }, tx);
+      suggestionSnapshot[itemId] = suggested.map((line) => ({ lotId: line.lotId, quantity: line.quantity }));
+      const confirmedForItem = input.lines.filter((line) => byId.get(line.lotId)!.item_id === itemId);
+      if (JSON.stringify(sortedAllocation(confirmedForItem)) !== JSON.stringify(sortedAllocation(suggested))) {
+        diverges = true;
+      }
+    }
+    if (diverges && !input.reason) {
+      throw new ValidationError("Informe o motivo do ajuste manual da distribuição sugerida");
+    }
+
     const movement = await tx.inventoryMovement.create({
-      data: { type: "DISTRIBUTION", occurredOn: new Date(input.occurredOn), projectId: input.projectId, note: input.note, createdById: actorUserId },
+      data: {
+        type: "DISTRIBUTION",
+        occurredOn: new Date(input.occurredOn),
+        projectId: input.projectId,
+        reason: input.reason,
+        note: input.note,
+        createdById: actorUserId,
+      },
     });
     for (const line of input.lines) {
       const lot = byId.get(line.lotId)!;
@@ -102,8 +136,13 @@ export async function distributeInventory(actorUserId: string, rawInput: unknown
     await appendAuditEvent({
       actorUserId, actorKind: "USER", action: "inventory.distribution.create",
       entityType: "InventoryMovement", entityId: movement.id, outcome: "SUCCESS",
-      metadata: { projectId: input.projectId, lineCount: input.lines.length },
-      allowedMetadataKeys: ["projectId", "lineCount"],
+      metadata: {
+        projectId: input.projectId,
+        lineCount: input.lines.length,
+        manualAdjustment: diverges,
+        ...(diverges ? { reason: input.reason, suggestionSnapshot: JSON.stringify(suggestionSnapshot) } : {}),
+      },
+      allowedMetadataKeys: ["projectId", "lineCount", "manualAdjustment", "reason", "suggestionSnapshot"],
     }, tx);
     return tx.inventoryMovement.findUniqueOrThrow({ where: { id: movement.id }, include: { lines: true } });
   }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted });

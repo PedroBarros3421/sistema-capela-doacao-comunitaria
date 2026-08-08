@@ -27,7 +27,8 @@ export function MovementForm({ items, onSuccess }: { items: Item[]; onSuccess: (
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form = new FormData(event.currentTarget); setLoading(true); setMessage(null);
     const movementLines = type === "DISTRIBUTION" ? lines : [{ lotId: String(form.get("lotId")), quantity: String(form.get("quantity")) }];
-    const body = { type, occurredOn: form.get("occurredOn"), projectId: type === "DISTRIBUTION" ? form.get("projectId") : undefined, reason: type === "DISCARD" ? form.get("reason") : undefined, note: form.get("note") || undefined, lines: movementLines };
+    const reason = type === "DISCARD" ? form.get("reason") : (form.get("adjustmentReason") || undefined);
+    const body = { type, occurredOn: form.get("occurredOn"), projectId: type === "DISTRIBUTION" ? form.get("projectId") : undefined, reason, note: form.get("note") || undefined, lines: movementLines };
     try {
       const response = await fetch("/api/admin/inventory/movements", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       const payload = await response.json() as { error?: { message: string } };
@@ -47,7 +48,7 @@ export function MovementForm({ items, onSuccess }: { items: Item[]; onSuccess: (
           <label>Quantidade total<input name="quantity" required inputMode="decimal" /></label>
           <Button type="button" variant="secondary" onClick={(event) => void suggest(event.currentTarget.form!)}>Sugerir lotes por validade</Button>
           <label>ID do projeto<input name="projectId" required /></label>
-          {lines.length > 0 && <fieldset><legend>Sugestão ajustável</legend>{lines.map((line, index) => <label key={line.lotId}>Lote {line.lotId.slice(0, 8)}<input value={line.quantity} onChange={(event) => setLines((current) => current.map((entry, position) => position === index ? { ...entry, quantity: event.target.value } : entry))} /></label>)}</fieldset>}
+          {lines.length > 0 && <fieldset><legend>Sugestão ajustável</legend>{lines.map((line, index) => <label key={line.lotId}>Lote {line.lotId.slice(0, 8)}<input value={line.quantity} onChange={(event) => setLines((current) => current.map((entry, position) => position === index ? { ...entry, quantity: event.target.value } : entry))} /></label>)}<label>Motivo do ajuste manual (obrigatório se alterar a sugestão)<textarea name="adjustmentReason" maxLength={1000} /></label></fieldset>}
         </> : <><label>ID do lote<input name="lotId" required /></label><label>Quantidade descartada<input name="quantity" required inputMode="decimal" /></label><label>Motivo<textarea name="reason" required maxLength={1000} /></label></>}
         <label>Data<input name="occurredOn" type="date" required /></label><label>Observação<textarea name="note" maxLength={1000} /></label>
       </fieldset><Button type="submit" loading={loading} disabled={type === "DISTRIBUTION" && lines.length === 0}>Confirmar movimentação</Button>
