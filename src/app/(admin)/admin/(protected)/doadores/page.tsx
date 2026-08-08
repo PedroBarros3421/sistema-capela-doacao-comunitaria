@@ -50,16 +50,19 @@ export default function DoadoresPage() {
       </header>
 
       <form
+        className="filter-bar"
         role="search"
+        aria-label="Buscar doadores"
         onSubmit={(event) => { event.preventDefault(); setLoading(true); void load(); }}
       >
-        <label htmlFor="donor-search">Buscar por nome, e-mail, telefone ou documento</label>
-        <input
-          id="donor-search"
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+        <label htmlFor="donor-search">Buscar por nome, e-mail, telefone ou documento
+          <input
+            id="donor-search"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
         <button type="submit">Buscar</button>
       </form>
 
@@ -73,7 +76,7 @@ export default function DoadoresPage() {
         <p className="empty-state" role="status">Nenhum doador encontrado.</p>
       ) : (
         <div className="table-scroll">
-          <table aria-label="Doadores cadastrados">
+          <table className="ledger-table" aria-label="Doadores cadastrados">
             <thead>
               <tr><th>Nome</th><th>Contato</th><th>Tipo</th><th>Revisão</th><th /></tr>
             </thead>
@@ -84,7 +87,7 @@ export default function DoadoresPage() {
                   <td>{donor.email ?? donor.phone ?? "—"}</td>
                   <td>{donor.relationshipType}</td>
                   <td>{donor.reviewStatus === "PENDING_REVIEW" ? "Em revisão" : "Ok"}</td>
-                  <td><Link href={`/admin/doadores/${donor.id}`}>Ver histórico</Link></td>
+                  <td className="row-actions"><Link href={`/admin/doadores/${donor.id}`}>Ver histórico</Link></td>
                 </tr>
               ))}
             </tbody>
