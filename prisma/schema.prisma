@@ -172,6 +172,7 @@ model User {
   inventoryLots       InventoryLot[]
   inventoryMovements  InventoryMovement[]
   resolvedDonorReviews DonorMatchReview[]
+  publishedReports    PublicReportPublication[]
 
   @@map("users")
 }
@@ -501,4 +502,22 @@ model InKindDonationTerm {
   lot                    InventoryLot @relation(fields: [lotId], references: [id], onDelete: Restrict)
 
   @@map("in_kind_donation_terms")
+}
+
+model PublicReportPublication {
+  id               String                    @id @default(uuid()) @db.Uuid
+  periodStart      DateTime                  @map("period_start") @db.Date
+  periodEnd        DateTime                  @map("period_end") @db.Date
+  categoryFilter   String?                   @map("category_filter") @db.VarChar(80)
+  snapshot         Json                      @db.JsonB
+  generatedPdfPath String?                   @map("generated_pdf_path") @db.Text
+  publishedById    String                    @map("published_by") @db.Uuid
+  publishedAt      DateTime                  @default(now()) @map("published_at") @db.Timestamptz(6)
+  supersedesId     String?                   @unique @map("supersedes_id") @db.Uuid
+  publishedBy      User                      @relation(fields: [publishedById], references: [id], onDelete: Restrict)
+  supersedes       PublicReportPublication?  @relation("ReportSupersession", fields: [supersedesId], references: [id], onDelete: Restrict)
+  supersededBy     PublicReportPublication?  @relation("ReportSupersession")
+
+  @@index([publishedAt])
+  @@map("public_report_publications")
 }
