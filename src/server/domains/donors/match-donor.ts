@@ -50,5 +50,16 @@ export async function matchDonor(
       reviewStatus: reviewPending ? "PENDING_REVIEW" : "CLEAR",
     },
   });
+
+  if (reviewPending) {
+    await client.donorMatchReview.create({
+      data: {
+        submittedDonorId: donor.id,
+        candidateDonorIds: [...new Set(secondaryCandidates.map(({ id }) => id))],
+        reason: "IDENTIFIER_CONFLICT",
+      },
+    });
+  }
+
   return { donor, reviewPending };
 }
