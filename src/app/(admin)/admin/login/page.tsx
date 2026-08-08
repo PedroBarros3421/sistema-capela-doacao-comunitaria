@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { Suspense, type FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Alert } from "@/components/shared/Alert";
@@ -12,7 +12,7 @@ type LoginState =
   | { status: "submitting" }
   | { status: "error"; message: string };
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "/admin";
@@ -93,5 +93,13 @@ export default function LoginPage() {
         </footer>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="admin-login-page" aria-busy="true" />}>
+      <LoginForm />
+    </Suspense>
   );
 }
