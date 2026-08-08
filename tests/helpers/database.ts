@@ -36,6 +36,7 @@ export async function createDisposableDatabase(): Promise<DisposableDatabase> {
       "prisma/migrations/002_public_donations/migration.sql",
       "prisma/migrations/003_inventory/migration.sql",
       "prisma/migrations/20260808114222_verify_inventory_migrations/migration.sql",
+      "prisma/migrations/004_donor_reviews/migration.sql",
     ];
     for (const migrationPath of migrationPaths) {
       const migration = await readFile(resolve(process.cwd(), migrationPath), "utf8");

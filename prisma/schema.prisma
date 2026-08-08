@@ -68,6 +68,17 @@ enum DonorReviewStatus {
   PENDING_REVIEW
 }
 
+enum DonorMatchReviewReason {
+  IDENTIFIER_CONFLICT
+  POSSIBLE_DUPLICATE
+}
+
+enum DonorMatchReviewStatus {
+  OPEN
+  KEEP_SEPARATE
+  MERGED
+}
+
 enum DonationType {
   ONE_OFF
   MONTHLY
@@ -160,6 +171,7 @@ model User {
   acceptedItemUpdates AcceptedItemConfig[]
   inventoryLots       InventoryLot[]
   inventoryMovements  InventoryMovement[]
+  resolvedDonorReviews DonorMatchReview[]
 
   @@map("users")
 }
@@ -256,6 +268,7 @@ model Donor {
   relationshipType   DonorRelationshipType   @map("relationship_type")
   origin             RecordOrigin            @default(PUBLIC)
   reviewStatus       DonorReviewStatus       @default(CLEAR) @map("review_status")
+  mergedIntoId       String?                 @map("merged_into_id") @db.Uuid
   createdAt          DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
   accessLinks        AccessLink[]
@@ -264,11 +277,31 @@ model Donor {
   subscriptions      RecurringSubscription[]
   receipts           DonationReceipt[]
   inventoryLots      InventoryLot[]
+  matchReviews       DonorMatchReview[]      @relation("SubmittedDonorReviews")
+  mergedInto         Donor?                  @relation("DonorMerge", fields: [mergedIntoId], references: [id], onDelete: Restrict)
+  mergedFrom         Donor[]                 @relation("DonorMerge")
 
   @@index([email])
   @@index([phone])
   @@index([reviewStatus, createdAt])
   @@map("donors")
+}
+
+model DonorMatchReview {
+  id               String                  @id @default(uuid()) @db.Uuid
+  submittedDonorId String                  @map("submitted_donor_id") @db.Uuid
+  candidateDonorIds String[]               @map("candidate_donor_ids") @db.Uuid
+  reason           DonorMatchReviewReason
+  status           DonorMatchReviewStatus  @default(OPEN)
+  openedAt         DateTime                @default(now()) @map("opened_at") @db.Timestamptz(6)
+  resolvedAt       DateTime?               @map("resolved_at") @db.Timestamptz(6)
+  resolvedById     String?                 @map("resolved_by") @db.Uuid
+  resolutionNote   String?                 @map("resolution_note") @db.Text
+  submittedDonor   Donor                   @relation("SubmittedDonorReviews", fields: [submittedDonorId], references: [id], onDelete: Restrict)
+  resolvedBy       User?                   @relation(fields: [resolvedById], references: [id], onDelete: Restrict)
+
+  @@index([status, openedAt])
+  @@map("donor_match_reviews")
 }
 
 model PaymentSimulation {
