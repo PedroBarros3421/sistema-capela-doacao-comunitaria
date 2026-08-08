@@ -57,8 +57,11 @@ async function seedCatalogWhenAvailable(administratorId: string) {
     await db.$executeRawUnsafe(
       `INSERT INTO inventory_items
         (id, name, category, unit, average_unit_value, status, created_at, updated_at)
-       SELECT $1::uuid, $2, $3, $4::"InventoryUnit", $5::numeric, 'ACTIVE'::"InventoryItemStatus", NOW(), NOW()
-       WHERE NOT EXISTS (SELECT 1 FROM inventory_items WHERE LOWER(name) = LOWER($2))`,
+       SELECT $1::uuid, $2::varchar(120), $3::varchar(80), $4::"InventoryUnit", $5::numeric(14,2), 'ACTIVE'::"InventoryItemStatus", NOW(), NOW()
+       WHERE NOT EXISTS (
+         SELECT 1 FROM inventory_items
+         WHERE LOWER(name::text) = LOWER($2::text)
+       )`,
       itemId,
       item.name,
       item.category,
@@ -66,12 +69,13 @@ async function seedCatalogWhenAvailable(administratorId: string) {
       item.averageValue,
     );
     const rows = await db.$queryRawUnsafe<Array<{ id: string }>>(
-      "SELECT id FROM inventory_items WHERE LOWER(name) = LOWER($1) LIMIT 1",
+      "SELECT id FROM inventory_items WHERE LOWER(name::text) = LOWER($1::text) LIMIT 1",
       item.name,
     );
+    if (!rows[0]) throw new Error(`Seeded inventory item not found: ${item.name}`);
     await db.$executeRawUnsafe(
       `INSERT INTO accepted_item_configs (item_id, accepted, priority, updated_by, updated_at)
-       VALUES ($1::uuid, TRUE, $2, $3::uuid, NOW())
+       VALUES ($1::uuid, TRUE, $2::boolean, $3::uuid, NOW())
        ON CONFLICT (item_id) DO NOTHING`,
       rows[0].id,
       item.priority,
