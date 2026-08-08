@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { Suspense, type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Alert } from "@/components/shared/Alert";
@@ -13,7 +13,7 @@ type PageState =
   | { status: "success" }
   | { status: "error"; message: string };
 
-export default function ConvitePage() {
+function ConviteForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [state, setState] = useState<PageState>({ status: "idle" });
@@ -88,5 +88,13 @@ export default function ConvitePage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function ConvitePage() {
+  return (
+    <Suspense fallback={<main className="public-access-page" aria-busy="true" />}>
+      <ConviteForm />
+    </Suspense>
   );
 }

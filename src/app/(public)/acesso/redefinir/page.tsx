@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { Suspense, type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Alert } from "@/components/shared/Alert";
@@ -17,7 +17,7 @@ type PageState =
   | { view: "set"; status: "success" }
   | { view: "set"; status: "error"; message: string };
 
-export default function RedefinirSenhaPage() {
+function RedefinirSenhaForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -133,5 +133,13 @@ export default function RedefinirSenhaPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function RedefinirSenhaPage() {
+  return (
+    <Suspense fallback={<main className="public-access-page" aria-busy="true" />}>
+      <RedefinirSenhaForm />
+    </Suspense>
   );
 }
