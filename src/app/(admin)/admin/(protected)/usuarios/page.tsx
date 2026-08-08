@@ -108,7 +108,7 @@ export default function UsuariosPage() {
         </section>
       )}
 
-      <form className="ledger-filters" role="search" aria-label="Filtrar usuários" onSubmit={(e) => e.preventDefault()}>
+      <form className="filter-bar" role="search" aria-label="Filtrar usuários" onSubmit={(e) => e.preventDefault()}>
         <label>Status
           <select value={statusFilter} onChange={(e) => { setLoading(true); setStatusFilter(e.target.value); }}>
             <option value="">Todos</option>
@@ -123,7 +123,7 @@ export default function UsuariosPage() {
         <p className="empty-state" role="status">Nenhum usuário encontrado.</p>
       ) : (
         <div className="table-scroll">
-          <table aria-label="Usuários cadastrados">
+          <table className="ledger-table" aria-label="Usuários cadastrados">
             <thead>
               <tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th>Ações</th></tr>
             </thead>

@@ -62,7 +62,7 @@ export default function AcessosPage() {
       <form
         role="search"
         aria-label="Filtrar histórico de acessos"
-        className="ledger-filters"
+        className="filter-bar"
         onSubmit={(e) => { e.preventDefault(); setLoading(true); setPage(1); load(); }}
       >
         <label>De<input type="datetime-local" value={from} onChange={(e) => setFrom(e.target.value)} /></label>
@@ -76,7 +76,7 @@ export default function AcessosPage() {
         <p className="empty-state" role="status">Nenhuma tentativa de login registrada.</p>
       ) : (
         <div className="table-scroll">
-          <table aria-label="Tentativas de login">
+          <table className="ledger-table" aria-label="Tentativas de login">
             <thead><tr><th>E-mail</th><th>Instante</th><th>IP</th><th>Resultado</th></tr></thead>
             <tbody>
               {attempts.map((attempt) => (

@@ -90,7 +90,7 @@ export default function ProjetosPage() {
         <p className="empty-state" role="status">Nenhum projeto cadastrado.</p>
       ) : (
         <div className="table-scroll">
-          <table aria-label="Projetos cadastrados">
+          <table className="ledger-table" aria-label="Projetos cadastrados">
             <thead><tr><th>Nome</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody>
               {projects.map((project) => (
