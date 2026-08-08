@@ -109,27 +109,57 @@ enum RecurringSubscriptionStatus {
   CANCELLED
 }
 
+enum InventoryUnit {
+  KG
+  UNIT
+  LITER
+}
+
+enum InventoryItemStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum InventoryLotStatus {
+  AVAILABLE
+  EXHAUSTED
+  DISCARDED
+}
+
+enum InventoryValuationSource {
+  MANUAL
+  AVERAGE_AT_RECEIPT
+}
+
+enum InventoryMovementType {
+  DISTRIBUTION
+  DISCARD
+}
+
 model User {
-  id               String         @id @default(uuid()) @db.Uuid
-  name             String         @db.VarChar(160)
-  email            String         @db.VarChar(254)
-  role             UserRole
-  status           UserStatus     @default(PENDING)
-  passwordHash     String?        @map("password_hash")
-  failedLoginCount Int            @default(0) @map("failed_login_count") @db.SmallInt
-  lastLoginAt      DateTime?      @map("last_login_at") @db.Timestamptz(6)
-  blockedAt        DateTime?      @map("blocked_at") @db.Timestamptz(6)
-  createdById      String?        @map("created_by") @db.Uuid
-  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
-  createdBy        User?          @relation("UserCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  createdUsers     User[]         @relation("UserCreator")
-  sessions         Session[]
-  loginAttempts    LoginAttempt[]
-  accessLinks      AccessLink[]   @relation("AccessLinkOwner")
-  createdLinks     AccessLink[]   @relation("AccessLinkCreator")
-  auditEvents      AuditEvent[]
-  ledgerEntries    LedgerEntry[]  @relation("LedgerEntryCreator")
+  id                  String               @id @default(uuid()) @db.Uuid
+  name                String               @db.VarChar(160)
+  email               String               @db.VarChar(254)
+  role                UserRole
+  status              UserStatus           @default(PENDING)
+  passwordHash        String?              @map("password_hash")
+  failedLoginCount    Int                  @default(0) @map("failed_login_count") @db.SmallInt
+  lastLoginAt         DateTime?            @map("last_login_at") @db.Timestamptz(6)
+  blockedAt           DateTime?            @map("blocked_at") @db.Timestamptz(6)
+  createdById         String?              @map("created_by") @db.Uuid
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy           User?                @relation("UserCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdUsers        User[]               @relation("UserCreator")
+  sessions            Session[]
+  loginAttempts       LoginAttempt[]
+  accessLinks         AccessLink[]         @relation("AccessLinkOwner")
+  createdLinks        AccessLink[]         @relation("AccessLinkCreator")
+  auditEvents         AuditEvent[]
+  ledgerEntries       LedgerEntry[]        @relation("LedgerEntryCreator")
+  acceptedItemUpdates AcceptedItemConfig[]
+  inventoryLots       InventoryLot[]
+  inventoryMovements  InventoryMovement[]
 
   @@map("users")
 }
@@ -211,6 +241,7 @@ model Project {
   paymentSimulations     PaymentSimulation[]
   ledgerEntries          LedgerEntry[]
   recurringSubscriptions RecurringSubscription[]
+  inventoryMovements     InventoryMovement[]
 
   @@index([status, name])
   @@map("projects")
@@ -232,6 +263,7 @@ model Donor {
   ledgerEntries      LedgerEntry[]
   subscriptions      RecurringSubscription[]
   receipts           DonationReceipt[]
+  inventoryLots      InventoryLot[]
 
   @@index([email])
   @@index([phone])
@@ -334,4 +366,106 @@ model DonationReceipt {
 
   @@index([donorId, generatedAt])
   @@map("donation_receipts")
+}
+
+model InventoryItem {
+  id               String              @id @default(uuid()) @db.Uuid
+  name             String              @db.VarChar(120)
+  category         String              @db.VarChar(80)
+  unit             InventoryUnit
+  averageUnitValue Decimal             @map("average_unit_value") @db.Decimal(14, 2)
+  status           InventoryItemStatus @default(ACTIVE)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  acceptedConfig   AcceptedItemConfig?
+  lots             InventoryLot[]
+
+  @@index([status, name])
+  @@map("inventory_items")
+}
+
+model AcceptedItemConfig {
+  itemId      String        @id @map("item_id") @db.Uuid
+  accepted    Boolean       @default(true)
+  priority    Boolean       @default(false)
+  updatedById String        @map("updated_by") @db.Uuid
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  item        InventoryItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  updatedBy   User          @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@map("accepted_item_configs")
+}
+
+model InventoryLot {
+  id                String                   @id @default(uuid()) @db.Uuid
+  itemId            String                   @map("item_id") @db.Uuid
+  receivedQuantity  Decimal                  @map("received_quantity") @db.Decimal(14, 3)
+  availableQuantity Decimal                  @map("available_quantity") @db.Decimal(14, 3)
+  receivedOn        DateTime                 @map("received_on") @db.Date
+  expiresOn         DateTime?                @map("expires_on") @db.Date
+  donorId           String?                  @map("donor_id") @db.Uuid
+  donorNameSnapshot String?                  @map("donor_name_snapshot") @db.VarChar(160)
+  estimatedValue    Decimal                  @map("estimated_value") @db.Decimal(14, 2)
+  valuationSource   InventoryValuationSource @map("valuation_source")
+  unitValueSnapshot Decimal?                 @map("unit_value_snapshot") @db.Decimal(14, 2)
+  status            InventoryLotStatus       @default(AVAILABLE)
+  version           Int                      @default(1)
+  createdById       String                   @map("created_by") @db.Uuid
+  createdAt         DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+  item              InventoryItem            @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  donor             Donor?                   @relation(fields: [donorId], references: [id], onDelete: Restrict)
+  createdBy         User                     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  movementLines     InventoryMovementLine[]
+  term              InKindDonationTerm?
+
+  @@index([itemId, status, expiresOn, receivedOn])
+  @@index([status, expiresOn])
+  @@map("inventory_lots")
+}
+
+model InventoryMovement {
+  id          String                  @id @default(uuid()) @db.Uuid
+  type        InventoryMovementType
+  occurredOn  DateTime                @map("occurred_on") @db.Date
+  projectId   String?                 @map("project_id") @db.Uuid
+  reason      String?                 @db.Text
+  note        String?                 @db.Text
+  createdById String                  @map("created_by") @db.Uuid
+  createdAt   DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  project     Project?                @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  createdBy   User                    @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  lines       InventoryMovementLine[]
+
+  @@index([occurredOn, type])
+  @@index([projectId, occurredOn])
+  @@map("inventory_movements")
+}
+
+model InventoryMovementLine {
+  id         String            @id @default(uuid()) @db.Uuid
+  movementId String            @map("movement_id") @db.Uuid
+  lotId      String            @map("lot_id") @db.Uuid
+  quantity   Decimal           @db.Decimal(14, 3)
+  lotVersion Int               @map("lot_version")
+  movement   InventoryMovement @relation(fields: [movementId], references: [id], onDelete: Restrict)
+  lot        InventoryLot      @relation(fields: [lotId], references: [id], onDelete: Restrict)
+
+  @@unique([movementId, lotId])
+  @@index([lotId])
+  @@map("inventory_movement_lines")
+}
+
+model InKindDonationTerm {
+  id                     String       @id @default(uuid()) @db.Uuid
+  lotId                  String       @unique @map("lot_id") @db.Uuid
+  descriptionSnapshot    String       @map("description_snapshot") @db.Text
+  estimatedValueSnapshot Decimal      @map("estimated_value_snapshot") @db.Decimal(14, 2)
+  donorSnapshot          Json         @map("donor_snapshot") @db.JsonB
+  generatedAt            DateTime     @default(now()) @map("generated_at") @db.Timestamptz(6)
+  filePath               String       @map("file_path") @db.Text
+  contentSha256          String       @map("content_sha256") @db.Char(64)
+  lot                    InventoryLot @relation(fields: [lotId], references: [id], onDelete: Restrict)
+
+  @@map("in_kind_donation_terms")
 }
